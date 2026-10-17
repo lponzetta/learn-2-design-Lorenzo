@@ -115,6 +115,13 @@ td, th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line
         <p id="window" style="margin:10px 0 0;font-weight:600"></p>
         <details><summary>Tabella oraria</summary><div style="overflow-x:auto"><table id="tbl"></table></div></details>
       </div>
+      <div class="panel" style="margin-top:18px">
+        <h2>Stagionalità: ore verdi al giorno lungo l'anno</h2>
+        <div class="row"><button id="year">Calcola l'anno</button><span id="yearInfo" class="hint" style="margin:0;color:var(--ink-2)">Usa la geometria e la zona impostate sopra. Un giorno ogni 5, passo di 10 minuti: pochi secondi.</span></div>
+        <canvas id="yearc" width="900" height="300" style="aspect-ratio:3;margin-top:10px"></canvas>
+        <div class="legend"><span><i style="background:var(--ok)"></i>ore di copertura totale</span><span><i style="background:var(--warn)"></i>+ parziale (≥ 80 %)</span><span><i style="background:var(--ink-2)"></i>ore di sole (> 5°)</span><span><i style="background:var(--line)"></i>stagione balneare 15 mag – 15 set</span></div>
+        <p id="yearMsg" style="margin:10px 0 0;font-weight:600"></p>
+      </div>
     </div>
   </div>
 </div>
@@ -409,6 +416,51 @@ function refresh(recomputeDay) {
   if (recomputeDay || !dayCache) dayCache = computeDay();
   drawTimeline(dayCache, m);
 }
+// ---------------------------------------------------------------- stagionalita'
+const yc = $('yearc'), yctx = yc.getContext('2d');
+const MESI = ['gen', 'feb', 'mar', 'apr', 'mag', 'giu', 'lug', 'ago', 'set', 'ott', 'nov', 'dic'];
+function dayHours(y, m, d, lat, lon, tz) {
+  let full = 0, part = 0, sunh = 0;
+  for (let mm = 240; mm <= 1320; mm += 10) {
+    const sun = sunPosition(new Date(Date.UTC(y, m - 1, d, 0, mm - 60 * tz, 0)), lat, lon);
+    if (sun.elev < 5) continue; sunh += 1 / 6;
+    const sol = solve(sun);
+    if (sol.e.feasible && sol.e.margin >= 0) full += 1 / 6; else if (sol.e.coverage >= 0.8) part += 1 / 6;
+  }
+  return { full, part, sunh };
+}
+function drawYear(rows, done) {
+  const W = yc.width, Hh = yc.height, L = 40, B = 36, T = 12, R = 10; yctx.clearRect(0, 0, W, Hh);
+  const x = doy => L + (doy - 1) / 365 * (W - L - R), yv = h => Hh - B - h / 16 * (Hh - T - B);
+  yctx.fillStyle = css('--line'); yctx.globalAlpha = .5; yctx.fillRect(x(135), T, x(258) - x(135), Hh - T - B); yctx.globalAlpha = 1;
+  yctx.strokeStyle = css('--line'); yctx.lineWidth = 1; yctx.fillStyle = css('--ink-2'); yctx.font = '12px ' + css('--font-body'); yctx.textAlign = 'right';
+  for (let h = 0; h <= 16; h += 4) { yctx.beginPath(); yctx.moveTo(L, yv(h)); yctx.lineTo(W - R, yv(h)); yctx.stroke(); yctx.fillText(h + ' h', L - 6, yv(h) + 4); }
+  yctx.textAlign = 'center'; for (let m = 0; m < 12; m++) yctx.fillText(MESI[m], x(15 + m * 30.4), Hh - B + 18);
+  yctx.setLineDash([4, 4]); yctx.strokeStyle = css('--ink-2'); yctx.beginPath(); yctx.moveTo(L, yv(4)); yctx.lineTo(W - R, yv(4)); yctx.stroke(); yctx.setLineDash([]);
+  yctx.textAlign = 'left'; yctx.fillText('giornata utile ≥ 4 h', L + 6, yv(4) - 5);
+  if (!rows.length) return;
+  const line = (key, color, width, add) => { yctx.strokeStyle = color; yctx.lineWidth = width; yctx.beginPath();
+    rows.forEach((r, i) => { const v = r[key] + (add ? r[add] : 0); i ? yctx.lineTo(x(r.doy), yv(v)) : yctx.moveTo(x(r.doy), yv(v)); }); yctx.stroke(); };
+  line('sunh', css('--ink-2'), 1.2); line('full', css('--warn'), 2, 'part'); line('full', css('--ok'), 3);
+  yctx.fillStyle = css('--ok'); rows.forEach(r => { yctx.beginPath(); yctx.arc(x(r.doy), yv(r.full), 3, 0, 7); yctx.fill(); });
+}
+drawYear([], false);
+$('year').onclick = async () => {
+  const lat = +$('lat').value, lon = +$('lon').value, tz = +$('tz').value, y = +$('date').value.slice(0, 4) || 2026;
+  const rows = []; $('year').disabled = true; $('yearMsg').textContent = 'Calcolo in corso…';
+  for (let doy = 3; doy <= 365; doy += 5) {
+    const d = new Date(Date.UTC(y, 0, doy)); const r = dayHours(y, d.getUTCMonth() + 1, d.getUTCDate(), lat, lon, tz);
+    rows.push({ doy, m: d.getUTCMonth(), ...r }); drawYear(rows, false);
+    await new Promise(res => setTimeout(res, 0));
+  }
+  $('year').disabled = false;
+  const tot = rows.reduce((a, r) => a + r.full, 0) * 365 / rows.length;
+  const months = []; for (let m = 0; m < 12; m++) { const rr = rows.filter(r => r.m === m); const avg = rr.reduce((a, r) => a + r.full, 0) / rr.length; months.push({ m, avg }); }
+  const good = months.filter(o => o.avg >= 4).map(o => MESI[o.m]);
+  const season = rows.filter(r => r.doy >= 135 && r.doy <= 258); const sAvg = season.reduce((a, r) => a + r.full, 0) / season.length;
+  const sUtil = 100 * season.filter(r => r.full >= 4).length / season.length;
+  $('yearMsg').textContent = `≈ ${tot.toFixed(0)} h/anno di copertura totale. Mesi con almeno 4 h/giorno in media: ${good.length ? good.join(', ') : 'nessuno'}. Stagione balneare (15 mag – 15 set): ${sAvg.toFixed(1)} h/giorno in media, ${sUtil.toFixed(0)} % di giornate utili.`;
+};
 refresh(true);
 if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => refresh(false));
 </script>
