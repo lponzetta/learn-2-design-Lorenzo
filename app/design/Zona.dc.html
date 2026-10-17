@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Zona d'ombra</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+body{margin:0;font-family:'Nunito Sans','Helvetica Neue',Arial,sans-serif;color:#122233}
+a{color:#0f7b8a}a:hover{color:#0b5f6b}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #f3f5f7; color: #122233; display: flex; flex-direction: column; overflow: hidden">
+  <div style="display: flex; align-items: center; gap: 12px; padding: 56px 20px 8px">
+    <a href="Installa.dc.html" aria-label="Indietro" style="display: flex; align-items: center; justify-content: center; width: 44px; height: 44px; border-radius: 12px; background: #ffffff; color: #122233; text-decoration: none"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg></a>
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #5b6b7a; font-weight: 700">Passo 3 di 3</div>
+      <h1 style="margin: 0; font-family: Sora, sans-serif; font-size: 24px; font-weight: 700">Cosa vuoi in ombra?</h1>
+    </div>
+  </div>
+  <p style="margin: 0 20px 10px; font-size: 13px; color: #5b6b7a; line-height: 1.4">Trascina il cerchio sulla pianta. Il palo è al centro, il mare in alto. L'ombra grigia è quella di adesso, le 11:20.</p>
+  <div style="margin: 0 20px; background: #ffffff; border-radius: 18px; overflow: hidden; touch-action: none">
+    <svg viewBox="0 0 350 350" width="350" height="350" role="img" aria-label="Pianta dall'alto: palo al centro, ombra attuale e cerchio della zona scelta" onPointerDown="{{ down }}" onPointerMove="{{ move }}" onPointerUp="{{ up }}" onPointerCancel="{{ up }}" style="display: block; cursor: grab">
+      <rect x="0" y="0" width="350" height="350" fill="#ffffff"></rect>
+      <path d="M0 40 L350 40" stroke="#bfe0ea" stroke-width="80" opacity="0.5"></path>
+      <text x="12" y="22" font-family="Nunito Sans, sans-serif" font-size="11" fill="#2b6f8f" font-weight="700">MARE · NORD</text>
+      <g stroke="#e3e9ee" stroke-width="1">
+        <path d="M35 0V350M85 0V350M135 0V350M185 0V350M235 0V350M285 0V350M335 0V350"></path>
+        <path d="M0 35H350M0 85H350M0 135H350M0 185H350M0 235H350M0 285H350M0 335H350"></path>
+      </g>
+      <ellipse cx="0" cy="0" rx="1" ry="1" transform="{{ shadowT }}" fill="#6b7680" opacity="0.4"></ellipse>
+      <line x1="175" y1="175" x2="{{ sunX }}" y2="{{ sunY }}" stroke="#f0a202" stroke-width="3" stroke-linecap="round"></line>
+      <circle cx="{{ sunX }}" cy="{{ sunY }}" r="7" fill="#f0a202"></circle>
+      <line x1="175" y1="175" x2="{{ armX }}" y2="{{ armY }}" stroke="#0e2a47" stroke-width="5" stroke-linecap="round"></line>
+      <circle cx="175" cy="175" r="7" fill="#0e2a47"></circle>
+      <g transform="{{ bedT }}">
+        <rect x="-20" y="-40" width="40" height="80" rx="8" fill="#2b6f8f" opacity="0.25"></rect>
+        <rect x="-20" y="-40" width="40" height="22" rx="8" fill="#2b6f8f" opacity="0.35"></rect>
+      </g>
+      <circle cx="{{ tx }}" cy="{{ ty }}" r="{{ tr }}" fill="{{ zoneFill }}" stroke="{{ zoneStroke }}" stroke-width="3"></circle>
+      <circle cx="{{ tx }}" cy="{{ ty }}" r="14" fill="#ffffff" stroke="{{ zoneStroke }}" stroke-width="3"></circle>
+      <path d="{{ gripPath }}" stroke="{{ zoneStroke }}" stroke-width="2" fill="none"></path>
+      <text x="338" y="342" text-anchor="end" font-family="Nunito Sans, sans-serif" font-size="10" fill="#8a9bab">griglia 1 m</text>
+    </svg>
+  </div>
+  <div style="display: flex; gap: 8px; margin: 12px 20px 0">
+    <button type="button" onClick="{{ pickSingle }}" style="flex: 1 1 0; height: 40px; border: 0; border-radius: 12px; font: inherit; font-weight: 700; font-size: 13px; background: {{ bgSingle }}; color: {{ fgSingle }}">Lettino</button>
+    <button type="button" onClick="{{ pickDouble }}" style="flex: 1 1 0; height: 40px; border: 0; border-radius: 12px; font: inherit; font-weight: 700; font-size: 13px; background: {{ bgDouble }}; color: {{ fgDouble }}">Due lettini</button>
+    <button type="button" onClick="{{ pickTable }}" style="flex: 1 1 0; height: 40px; border: 0; border-radius: 12px; font: inherit; font-weight: 700; font-size: 13px; background: {{ bgTable }}; color: {{ fgTable }}">Tavolo</button>
+  </div>
+  <div style="margin: 12px 20px 0; padding: 14px 16px; background: #ffffff; border-radius: 16px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px">
+    <div style="border-left: 3px solid {{ zoneStroke }}; padding-left: 10px">
+      <div style="font-family: Sora, sans-serif; font-size: 22px; font-weight: 700">{{ covNow }}</div>
+      <div style="font-size: 12px; color: #5b6b7a">zona in ombra adesso</div>
+    </div>
+    <div style="border-left: 3px solid #0f7b8a; padding-left: 10px">
+      <div style="font-family: Sora, sans-serif; font-size: 22px; font-weight: 700">{{ window }}</div>
+      <div style="font-size: 12px; color: #5b6b7a">ombra totale oggi</div>
+    </div>
+    <div style="grid-column: 1 / -1; font-size: 13px; line-height: 1.45; color: #5b6b7a">{{ hint }}</div>
+  </div>
+  <div style="flex: 1 1 auto"></div>
+  <div style="padding: 12px 20px 36px">
+    <a href="Oggi.dc.html" style="display: flex; align-items: center; justify-content: center; height: 54px; border-radius: 16px; background: #0f7b8a; color: #ffffff; font-weight: 700; font-size: 16px; text-decoration: none">Conferma la zona</a>
+  </div>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+// Parametri del costruttore (modello "Magico 300"), non modificabili dall'utente.
+const P = { H: 2.0, L: 1.6, R: 1.5, thmax: 70, bemax: 70, hmin: 1.6, offMin: 0, offMax: 0.8 };
+const DEG = Math.PI / 180, PX = 50, CX = 175, CY = 175;   // 50 px = 1 m
+const LAT = 44.06, LON = 12.57, TZ = 2, DAY = [2026, 7, 15], NOW_MIN = 11 * 60 + 20;
+function sunPosition(d, lat, lon) {
+  let y = d.getUTCFullYear(), m = d.getUTCMonth() + 1; const dd = d.getUTCDate() + (d.getUTCHours() + d.getUTCMinutes() / 60) / 24;
+  if (m <= 2) { y -= 1; m += 12; } const a = Math.floor(y / 100), b = 2 - a + Math.floor(a / 4);
+  const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + dd + b - 1524.5, jc = (jd - 2451545) / 36525;
+  const gml = ((280.46646 + jc * (36000.76983 + jc * 0.0003032)) % 360 + 360) % 360, gma = 357.52911 + jc * (35999.05029 - 0.0001537 * jc);
+  const ecc = 0.016708634 - jc * (0.000042037 + 0.0000001267 * jc), gmar = gma * DEG;
+  const ceq = Math.sin(gmar) * (1.914602 - jc * (0.004817 + 0.000014 * jc)) + Math.sin(2 * gmar) * (0.019993 - 0.000101 * jc) + Math.sin(3 * gmar) * 0.000289;
+  const al = gml + ceq - 0.00569 - 0.00478 * Math.sin((125.04 - 1934.136 * jc) * DEG);
+  const ob = 23 + (26 + (21.448 - jc * (46.815 + jc * (0.00059 - jc * 0.001813))) / 60) / 60 + 0.00256 * Math.cos((125.04 - 1934.136 * jc) * DEG);
+  const decl = Math.asin(Math.sin(ob * DEG) * Math.sin(al * DEG)), yy = Math.tan(ob * DEG / 2) ** 2;
+  const eot = 4 / DEG * (yy * Math.sin(2 * gml * DEG) - 2 * ecc * Math.sin(gmar) + 4 * ecc * yy * Math.sin(gmar) * Math.cos(2 * gml * DEG) - 0.5 * yy * yy * Math.sin(4 * gml * DEG) - 1.25 * ecc * ecc * Math.sin(2 * gmar));
+  const minutes = d.getUTCHours() * 60 + d.getUTCMinutes(), tsm = ((minutes + eot + 4 * lon) % 1440 + 1440) % 1440, ha = tsm / 4 - 180;
+  const latr = lat * DEG, cz = Math.max(-1, Math.min(1, Math.sin(latr) * Math.sin(decl) + Math.cos(latr) * Math.cos(decl) * Math.cos(ha * DEG)));
+  const zen = Math.acos(cz); let elev = 90 - zen / DEG; const sz = Math.sin(zen); let az = 180;
+  if (sz > 1e-9) { const caz = Math.max(-1, Math.min(1, (Math.sin(latr) * cz - Math.sin(decl)) / (Math.cos(latr) * sz))); az = Math.acos(caz) / DEG; az = ha > 0 ? (az + 180) % 360 : (540 - az) % 360; }
+  return { elev, az };
+}
+const dirv = (a, t) => [Math.sin(t * DEG) * Math.sin(a * DEG), Math.sin(t * DEG) * Math.cos(a * DEG), Math.cos(t * DEG)];
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+function basis(n) { const ref = Math.abs(n[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0]; let u = [n[1] * ref[2] - n[2] * ref[1], n[2] * ref[0] - n[0] * ref[2], n[0] * ref[1] - n[1] * ref[0]]; const l = Math.hypot(u[0], u[1], u[2]); u = u.map(v => v / l); return [u, [n[1] * u[2] - n[2] * u[1], n[2] * u[0] - n[0] * u[2], n[0] * u[1] - n[1] * u[0]]]; }
+function evaluate(p, s, T) {
+  const ad = dirv(p.alpha, p.theta), C = [P.L * ad[0] + p.off * Math.sin(p.alpha * DEG), P.L * ad[1] + p.off * Math.cos(p.alpha * DEG), P.H + P.L * ad[2]], n = dirv(p.gamma, p.beta);
+  const [u1, u2] = basis(n); const pr = q => { const k = q[2] / s[2]; return [q[0] - s[0] * k, q[1] - s[1] * k]; };
+  const G = pr(C), p1 = pr([C[0] + P.R * u1[0], C[1] + P.R * u1[1], C[2] + P.R * u1[2]]), p2 = pr([C[0] + P.R * u2[0], C[1] + P.R * u2[1], C[2] + P.R * u2[2]]);
+  const M = [p1[0] - G[0], p1[1] - G[1], p2[0] - G[0], p2[1] - G[1]], det = M[0] * M[3] - M[2] * M[1];
+  const zlow = C[2] - P.R * Math.sqrt(Math.max(0, 1 - n[2] * n[2]));
+  const feasible = p.theta <= P.thmax + 0.01 && p.beta >= -0.01 && p.beta <= P.bemax + 0.01 && zlow >= P.hmin - 0.005 && p.off >= P.offMin - 1e-6 && p.off <= P.offMax + 1e-6;
+  if (Math.abs(det) < 1e-9) return { margin: -10, coverage: 0, feasible, G, M };
+  const inv = [M[3] / det, -M[1] / det, -M[2] / det, M[0] / det]; let maxRho = 0, inside = 0;
+  for (let i = 0; i < 36; i++) { const ph = 2 * Math.PI * i / 36, qx = T.x + T.r * Math.cos(ph) - G[0], qy = T.y + T.r * Math.sin(ph) - G[1]; maxRho = Math.max(maxRho, Math.hypot(inv[0] * qx + inv[2] * qy, inv[1] * qx + inv[3] * qy)); }
+  for (let i = 0; i < 80; i++) { const rr = T.r * Math.sqrt((i + 0.5) / 80), ph = (i + 0.5) * 2.39996, qx = T.x + rr * Math.cos(ph) - G[0], qy = T.y + rr * Math.sin(ph) - G[1]; const a = inv[0] * qx + inv[2] * qy, b = inv[1] * qx + inv[3] * qy; if (a * a + b * b <= 1) inside++; }
+  return { margin: 1 - maxRho, coverage: inside / 80, feasible, G, M };
+}
+function analytic(s, sun, T, off) {
+  let ox = 0, oy = 0, alpha = 180, theta = 0;
+  for (let it = 0; it < (off > 0 ? 5 : 1); it++) {
+    const dx = T.x - ox, dy = T.y - oy, dz = -P.H, b = 2 * (dx * s[0] + dy * s[1] + dz * s[2]), c = dx * dx + dy * dy + dz * dz - P.L * P.L;
+    const disc = b * b - 4 * c; if (disc < 0) return null; const lam = (-b + Math.sqrt(disc)) / 2; if (lam <= 0) return null;
+    const ex = dx + lam * s[0], ey = dy + lam * s[1], ez = dz + lam * s[2];
+    alpha = ((Math.atan2(ex, ey) / DEG) % 360 + 360) % 360; theta = Math.acos(clamp(ez / P.L, -1, 1)) / DEG; ox = off * Math.sin(alpha * DEG); oy = off * Math.cos(alpha * DEG);
+  }
+  return { alpha, theta, beta: 90 - sun.elev, gamma: sun.az, off };
+}
+const score = e => e.coverage + (e.margin > 0 ? 0.2 * Math.min(e.margin, 0.5) : 2 * e.margin) - (e.feasible ? 0 : 5);
+function solve(sun, T) {
+  const s = dirv(sun.az, 90 - sun.elev); let best = null, bestE = null, bestSc = -Infinity;
+  for (let k = 0; k <= 5; k++) { const off = P.offMin + (P.offMax - P.offMin) * k / 5; const p = analytic(s, sun, T, off); if (!p) continue;
+    p.theta = clamp(p.theta, 0, P.thmax); p.beta = clamp(p.beta, 0, P.bemax); let e = evaluate(p, s, T);
+    let g = 0; while (!(e.feasible) && p.beta > 0.5 && g++ < 70) { p.beta -= 1; e = evaluate(p, s, T); }
+    const sc = score(e) - (e.feasible && e.margin >= 0 ? 0.02 * off : 0); if (sc > bestSc) { bestSc = sc; best = p; bestE = e; } }
+  let p = best || { alpha: sun.az, theta: P.thmax, beta: Math.min(90 - sun.elev, P.bemax), gamma: sun.az, off: P.offMax }, e = bestE || evaluate(p, s, T);
+  if (e.feasible && e.margin >= 0) return { p, e, s };
+  let step = 8, lstep = 0.15, bs = score(e);
+  for (let it = 0; it < 60; it++) { let imp = false;
+    for (let j = 0; j < 5; j++) for (const sg of [-1, 1]) { const q = { ...p };
+      if (j === 0) q.alpha = ((q.alpha + sg * step) % 360 + 360) % 360; if (j === 1) q.theta = clamp(q.theta + sg * step, 0, P.thmax); if (j === 2) q.beta = clamp(q.beta + sg * step, 0, P.bemax);
+      if (j === 3) q.gamma = ((q.gamma + sg * step) % 360 + 360) % 360; if (j === 4) q.off = clamp(q.off + sg * lstep, P.offMin, P.offMax);
+      const eq = evaluate(q, s, T), sc = score(eq); if (sc > bs + 1e-6) { bs = sc; p = q; e = eq; imp = true; } }
+    if (!imp) { step /= 2; lstep /= 2; if (step < 0.3) break; } }
+  return { p, e, s };
+}
+const sunAt = min => sunPosition(new Date(Date.UTC(DAY[0], DAY[1] - 1, DAY[2], 0, min - 60 * TZ)), LAT, LON);
+const fmt = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+function dayWindow(T) { let first = null, last = null; for (let m = 300; m <= 1260; m += 15) { const sun = sunAt(m); if (sun.elev < 5) continue; const r = solve(sun, T); if (r.e.feasible && r.e.margin >= 0) { if (first === null) first = m; last = m; } } return first === null ? null : [first, last + 15]; }
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { tx: 0, ty: 1.2, tr: 1.0, kind: 'single', drag: null, win: null }; }
+  componentDidMount() { this.setState({ win: dayWindow({ x: 0, y: 1.2, r: 1.0 }) }); }
+  toModel(ev) { const r = ev.currentTarget.getBoundingClientRect(); const x = (ev.clientX - r.left) * 350 / r.width, y = (ev.clientY - r.top) * 350 / r.height; return [(x - CX) / PX, -(y - CY) / PX]; }
+  renderVals() {
+    const T = { x: this.state.tx, y: this.state.ty, r: this.state.tr };
+    const sun = sunAt(NOW_MIN), sol = solve(sun, T), full = sol.e.feasible && sol.e.margin >= 0;
+    const G = sol.e.G, M = sol.e.M;
+    const shadowT = `matrix(${(M[0] * PX).toFixed(2)} ${(-M[1] * PX).toFixed(2)} ${(M[2] * PX).toFixed(2)} ${(-M[3] * PX).toFixed(2)} ${(CX + G[0] * PX).toFixed(1)} ${(CY - G[1] * PX).toFixed(1)})`;
+    const ad = dirv(sol.p.alpha, sol.p.theta), ex = P.L * ad[0], ey = P.L * ad[1];
+    const win = this.state.win;
+    const stroke = full ? '#1e8a4c' : sol.e.coverage >= 0.8 ? '#c2731a' : '#c0392b';
+    const chip = (k) => this.state.kind === k;
+    const bedAngle = 0;
+    return {
+      tx: CX + T.x * PX, ty: CY - T.y * PX, tr: T.r * PX,
+      zoneFill: full ? 'rgba(30,138,76,0.12)' : 'rgba(192,57,43,0.10)', zoneStroke: stroke,
+      gripPath: `M${CX + T.x * PX - 6} ${CY - T.y * PX}h12M${CX + T.x * PX} ${CY - T.y * PX - 6}v12`,
+      bedT: `translate(${(CX + T.x * PX).toFixed(1)} ${(CY - T.y * PX).toFixed(1)}) rotate(${bedAngle})`,
+      shadowT, sunX: CX + 150 * Math.sin(sun.az * DEG), sunY: CY - 150 * Math.cos(sun.az * DEG),
+      armX: CX + ex * PX, armY: CY - ey * PX,
+      covNow: `${Math.round(100 * sol.e.coverage)} %`,
+      window: win ? `${fmt(win[0])}–${fmt(win[1])}` : (this.state.win === null ? '…' : 'mai'),
+      hint: full ? (win ? `Perfetto: fino alle ${fmt(win[1])} dormi tranquillo. Dopo, il sole è troppo basso e l'ombra scappa verso il mare: ti avviso 15 minuti prima.` : 'Zona coperta adesso.') : `Adesso copro il ${Math.round(100 * sol.e.coverage)} % della zona: avvicinala al palo o spostala dal lato opposto al sole.`,
+      down: (ev) => { const [x, y] = this.toModel(ev); if (Math.hypot(x - T.x, y - T.y) < T.r + 0.3) { ev.currentTarget.setPointerCapture(ev.pointerId); this.setState({ drag: true }); } },
+      move: (ev) => { if (!this.state.drag) return; const [x, y] = this.toModel(ev); this.setState({ tx: clamp(x, -3.2, 3.2), ty: clamp(y, -3.2, 3.2) }); },
+      up: (ev) => { if (!this.state.drag) return; this.setState({ drag: null, win: dayWindow({ x: this.state.tx, y: this.state.ty, r: this.state.tr }) }); },
+      pickSingle: () => this.setState({ kind: 'single', tr: 1.0, win: dayWindow({ x: T.x, y: T.y, r: 1.0 }) }),
+      pickDouble: () => this.setState({ kind: 'double', tr: 1.3, win: dayWindow({ x: T.x, y: T.y, r: 1.3 }) }),
+      pickTable: () => this.setState({ kind: 'table', tr: 1.5, win: dayWindow({ x: T.x, y: T.y, r: 1.5 }) }),
+      bgSingle: chip('single') ? '#0e2a47' : '#ffffff', fgSingle: chip('single') ? '#ffffff' : '#122233',
+      bgDouble: chip('double') ? '#0e2a47' : '#ffffff', fgDouble: chip('double') ? '#ffffff' : '#122233',
+      bgTable: chip('table') ? '#0e2a47' : '#ffffff', fgTable: chip('table') ? '#ffffff' : '#122233',
+    };
+  }
+}
+</script>
+</body>
+</html>

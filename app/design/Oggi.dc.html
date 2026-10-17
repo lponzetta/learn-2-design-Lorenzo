@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="it">
+<head>
+<meta charset="utf-8">
+<title>Oggi</title>
+<script src="./support.js"></script>
+</head>
+<body>
+<x-dc>
+<helmet>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Sora:wght@600;700&family=Nunito+Sans:wght@400;600;700&display=swap">
+<style>
+body{margin:0;font-family:'Nunito Sans','Helvetica Neue',Arial,sans-serif;color:#122233}
+a{color:#0f7b8a}a:hover{color:#0b5f6b}
+</style>
+</helmet>
+<div style="width: 390px; height: 844px; box-sizing: border-box; background: #f3f5f7; color: #122233; display: flex; flex-direction: column; overflow: hidden">
+  <div style="display: flex; align-items: flex-end; justify-content: space-between; padding: 56px 20px 10px">
+    <div style="display: flex; flex-direction: column; gap: 2px">
+      <div style="font-size: 12px; letter-spacing: 0.1em; text-transform: uppercase; color: #5b6b7a; font-weight: 700">Bagno 34 · mercoledì 15 luglio</div>
+      <h1 style="margin: 0; font-family: Sora, sans-serif; font-size: 24px; font-weight: 700">Oggi</h1>
+    </div>
+    <div style="display: flex; gap: 6px">
+      <div style="display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 999px; background: #ffffff; font-size: 12px; font-weight: 700; color: #5b6b7a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><path d="M3 8h11a3 3 0 1 0-3-3M3 14h14a3 3 0 1 1-3 3M3 11h6"></path></svg>14 km/h</div>
+      <div style="display: flex; align-items: center; gap: 5px; height: 28px; padding: 0 10px; border-radius: 999px; background: #ffffff; font-size: 12px; font-weight: 700; color: #5b6b7a"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" aria-hidden="true"><rect x="3" y="7" width="16" height="10" rx="2"></rect><path d="M21 11v2"></path><rect x="5" y="9" width="10" height="6" fill="currentColor" stroke="none"></rect></svg>86 %</div>
+    </div>
+  </div>
+  <div style="margin: 0 20px; padding: 18px 18px 16px; border-radius: 20px; background: {{ heroBg }}; color: #ffffff; display: flex; flex-direction: column; gap: 6px">
+    <div style="display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; opacity: 0.85">
+      <span style="display: inline-block; width: 10px; height: 10px; border-radius: 50%; background: #ffffff"></span>{{ heroLabel }}
+    </div>
+    <div style="font-family: Sora, sans-serif; font-size: 34px; line-height: 1.1; font-weight: 700">{{ heroTitle }}</div>
+    <div style="font-size: 14px; line-height: 1.45; opacity: 0.9">{{ heroText }}</div>
+  </div>
+  <div style="margin: 12px 20px 0; padding: 14px 16px; background: #ffffff; border-radius: 16px; display: flex; flex-direction: column; gap: 10px">
+    <div style="display: flex; justify-content: space-between; align-items: baseline">
+      <div style="font-weight: 700; font-size: 14px">La giornata del lettino</div>
+      <div style="font-size: 12px; color: #5b6b7a">ora: <b style="color: #122233">{{ nowLabel }}</b></div>
+    </div>
+    <svg viewBox="0 0 318 54" width="318" height="54" role="img" aria-label="Linea del tempo: verde dove la zona è tutta in ombra, arancione copertura parziale, rosso scoperta">
+      <sc-for list="{{ segs }}" as="sg" hint-placeholder-count="12">
+        <rect x="{{ sg.x }}" y="8" width="{{ sg.w }}" height="22" fill="{{ sg.fill }}"></rect>
+      </sc-for>
+      <line x1="{{ nowX }}" y1="2" x2="{{ nowX }}" y2="36" stroke="#122233" stroke-width="2"></line>
+      <text x="0" y="50" font-family="Nunito Sans, sans-serif" font-size="10" fill="#8a9bab">6:00</text>
+      <text x="106" y="50" text-anchor="middle" font-family="Nunito Sans, sans-serif" font-size="10" fill="#8a9bab">10:00</text>
+      <text x="212" y="50" text-anchor="middle" font-family="Nunito Sans, sans-serif" font-size="10" fill="#8a9bab">16:00</text>
+      <text x="318" y="50" text-anchor="end" font-family="Nunito Sans, sans-serif" font-size="10" fill="#8a9bab">21:00</text>
+    </svg>
+    <label for="ora" style="font-size: 12px; color: #5b6b7a">Scorri per vedere la giornata (anteprima)</label>
+    <input id="ora" type="range" min="360" max="1260" step="10" value="{{ nowMin }}" onInput="{{ scrub }}" style="width: 100%; accent-color: #0f7b8a">
+  </div>
+  <div style="margin: 12px 20px 0; padding: 14px 16px; background: #ffffff; border-radius: 16px; display: flex; gap: 12px; align-items: flex-start">
+    <div style="display: flex; align-items: center; justify-content: center; width: 40px; height: 40px; border-radius: 12px; background: #fff4de; color: #b26b00; flex: 0 0 auto"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9M13.7 21a2 2 0 0 1-3.4 0"></path></svg></div>
+    <div style="display: flex; flex-direction: column; gap: 4px">
+      <div style="font-weight: 700; font-size: 14px">{{ nextTitle }}</div>
+      <div style="font-size: 13px; line-height: 1.45; color: #5b6b7a">{{ nextText }}</div>
+    </div>
+  </div>
+  <div style="display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin: 12px 20px 0">
+    <div style="padding: 10px 12px; background: #ffffff; border-radius: 14px"><div style="font-family: Sora, sans-serif; font-size: 18px; font-weight: 700">{{ sunElev }}</div><div style="font-size: 11px; color: #5b6b7a">sole, elevazione</div></div>
+    <div style="padding: 10px 12px; background: #ffffff; border-radius: 14px"><div style="font-family: Sora, sans-serif; font-size: 18px; font-weight: 700">{{ moves }}</div><div style="font-size: 11px; color: #5b6b7a">movimenti oggi</div></div>
+    <div style="padding: 10px 12px; background: #ffffff; border-radius: 14px"><div style="font-family: Sora, sans-serif; font-size: 18px; font-weight: 700">UV 8</div><div style="font-size: 11px; color: #5b6b7a">indice UV, alto</div></div>
+  </div>
+  <div style="flex: 1 1 auto"></div>
+  <nav aria-label="Sezioni" style="display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); padding: 10px 12px 30px; background: #ffffff; border-top: 1px solid #e3e9ee">
+    <a href="Oggi.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; color: #0f7b8a; font-size: 11px; font-weight: 700; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2M12 20v2M2 12h2M20 12h2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"></path></svg>Oggi</a>
+    <a href="Zona.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; color: #5b6b7a; font-size: 11px; font-weight: 700; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><circle cx="12" cy="12" r="8"></circle><circle cx="12" cy="12" r="2"></circle></svg>Zona</a>
+    <a href="Esplora.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; color: #5b6b7a; font-size: 11px; font-weight: 700; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"></circle><path d="M15.5 8.5l-2 5-5 2 2-5z"></path></svg>Esplora</a>
+    <a href="Installa.dc.html" style="display: flex; flex-direction: column; align-items: center; gap: 4px; padding: 6px 0; color: #5b6b7a; font-size: 11px; font-weight: 700; text-decoration: none"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" aria-hidden="true"><rect x="5" y="3" width="14" height="18" rx="2"></rect><path d="M9 7h6M9 11h6"></path></svg>Ombrellone</a>
+  </nav>
+</div>
+</x-dc>
+<script type="text/x-dc" data-dc-script data-props='{"$preview":{"width":390,"height":844}}'>
+// Soglie di elevazione per azimut del modello "Magico 300" con il palo a Sud del lettino
+// (dalla simulazione: sotto la soglia l'ombra totale non e' possibile).
+const AZ = [0, 15, 30, 45, 60, 75, 90, 105, 120, 135, 150, 165, 180];
+const EMIN = [53, 53, 51, 49, 45, 43, 37, 35, 33, 29, 27, 25, 25];
+const DEG = Math.PI / 180, LAT = 44.06, LON = 12.57, TZ = 2, DAY = [2026, 7, 15];
+function sunPosition(d, lat, lon) {
+  let y = d.getUTCFullYear(), m = d.getUTCMonth() + 1; const dd = d.getUTCDate() + (d.getUTCHours() + d.getUTCMinutes() / 60) / 24;
+  if (m <= 2) { y -= 1; m += 12; } const a = Math.floor(y / 100), b = 2 - a + Math.floor(a / 4);
+  const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + dd + b - 1524.5, jc = (jd - 2451545) / 36525;
+  const gml = ((280.46646 + jc * (36000.76983 + jc * 0.0003032)) % 360 + 360) % 360, gma = 357.52911 + jc * (35999.05029 - 0.0001537 * jc);
+  const ecc = 0.016708634 - jc * (0.000042037 + 0.0000001267 * jc), gmar = gma * DEG;
+  const ceq = Math.sin(gmar) * (1.914602 - jc * (0.004817 + 0.000014 * jc)) + Math.sin(2 * gmar) * (0.019993 - 0.000101 * jc) + Math.sin(3 * gmar) * 0.000289;
+  const al = gml + ceq - 0.00569 - 0.00478 * Math.sin((125.04 - 1934.136 * jc) * DEG);
+  const ob = 23 + (26 + (21.448 - jc * (46.815 + jc * (0.00059 - jc * 0.001813))) / 60) / 60 + 0.00256 * Math.cos((125.04 - 1934.136 * jc) * DEG);
+  const decl = Math.asin(Math.sin(ob * DEG) * Math.sin(al * DEG)), yy = Math.tan(ob * DEG / 2) ** 2;
+  const eot = 4 / DEG * (yy * Math.sin(2 * gml * DEG) - 2 * ecc * Math.sin(gmar) + 4 * ecc * yy * Math.sin(gmar) * Math.cos(2 * gml * DEG) - 0.5 * yy * yy * Math.sin(4 * gml * DEG) - 1.25 * ecc * ecc * Math.sin(2 * gmar));
+  const minutes = d.getUTCHours() * 60 + d.getUTCMinutes(), tsm = ((minutes + eot + 4 * lon) % 1440 + 1440) % 1440, ha = tsm / 4 - 180;
+  const latr = lat * DEG, cz = Math.max(-1, Math.min(1, Math.sin(latr) * Math.sin(decl) + Math.cos(latr) * Math.cos(decl) * Math.cos(ha * DEG)));
+  const zen = Math.acos(cz); let elev = 90 - zen / DEG; const sz = Math.sin(zen); let az = 180;
+  if (sz > 1e-9) { const caz = Math.max(-1, Math.min(1, (Math.sin(latr) * cz - Math.sin(decl)) / (Math.cos(latr) * sz))); az = Math.acos(caz) / DEG; az = ha > 0 ? (az + 180) % 360 : (540 - az) % 360; }
+  return { elev, az };
+}
+const sunAt = min => sunPosition(new Date(Date.UTC(DAY[0], DAY[1] - 1, DAY[2], 0, min - 60 * TZ)), LAT, LON);
+function emin(az) { const a = az <= 180 ? az : 360 - az; let i = 0; while (i < AZ.length - 2 && AZ[i + 1] < a) i++; const t = (a - AZ[i]) / 15; return EMIN[i] + (EMIN[i + 1] - EMIN[i]) * t; }
+function state(min) { const s = sunAt(min); if (s.elev < 5) return 0; const e = emin(s.az); return s.elev >= e ? 3 : s.elev >= e - 10 ? 2 : 1; }
+const fmt = m => `${Math.floor(m / 60)}:${String(m % 60).padStart(2, '0')}`;
+const segs = []; for (let m = 360; m < 1260; m += 10) segs.push({ m, st: state(m) });
+const fullSegs = segs.filter(s => s.st === 3); const WIN = fullSegs.length ? [fullSegs[0].m, fullSegs[fullSegs.length - 1].m + 10] : null;
+class Component extends DCLogic {
+  constructor(props) { super(props); this.state = { now: 11 * 60 + 20 }; }
+  renderVals() {
+    const now = this.state.now, st = state(now), sun = sunAt(now);
+    const cols = ['#e3e9ee', '#e34948', '#eda100', '#1baf7a'];
+    const toEnd = WIN ? WIN[1] - now : 0, h = Math.floor(toEnd / 60), mm = toEnd % 60;
+    const protectedNow = st === 3 && WIN && now < WIN[1];
+    let heroBg, heroLabel, heroTitle, heroText, nextTitle, nextText;
+    if (protectedNow) {
+      heroBg = '#1e8a4c'; heroLabel = 'Protetto';
+      heroTitle = `Ombra totale fino alle ${fmt(WIN[1])}`;
+      heroText = `Ancora ${h} h ${mm} min di ombra garantita sul lettino. L'ombrellone si corregge da solo ogni 10 minuti.`;
+      nextTitle = `Alle ${fmt(WIN[1] - 15)} ti avviso`;
+      nextText = `Dopo le ${fmt(WIN[1])} il sole scende sotto i ${Math.round(emin(sunAt(WIN[1]).az))}° e l'ombra scappa verso il mare. Potrai spostare il lettino di 60 cm verso il palo per guadagnare un'altra mezz'ora.`;
+    } else if (st === 2) {
+      heroBg = '#c2731a'; heroLabel = 'Ombra parziale';
+      heroTitle = WIN && now < WIN[0] ? `Ombra totale dalle ${fmt(WIN[0])}` : 'Il sole è basso';
+      heroText = WIN && now < WIN[0] ? `Adesso copro circa l'80 % del lettino: il braccio è già a fine corsa verso il sole.` : `Copro la parte del lettino più vicina al palo. Sposta il lettino di 60 cm verso il palo per restare all'ombra.`;
+      nextTitle = WIN && now < WIN[0] ? `Dalle ${fmt(WIN[0])} ombra totale` : 'Consiglio: avvicina il lettino al palo';
+      nextText = WIN && now < WIN[0] ? 'Non devi fare niente: appena il sole sale abbastanza l'ombra si chiude sul lettino.' : 'Oppure accetta un po' di sole sui piedi: la testa resta all'ombra fino al tramonto.';
+    } else if (st === 1) {
+      heroBg = '#c0392b'; heroLabel = 'Scoperto';
+      heroTitle = WIN && now < WIN[0] ? `Ombra totale dalle ${fmt(WIN[0])}` : 'Ombra fuori dal lettino';
+      heroText = 'Sole troppo basso per questo ombrellone: l'ombra è dal lato opposto al sole, oltre il lettino.';
+      nextTitle = WIN && now < WIN[0] ? 'Aspetta: il sole sta salendo' : 'Sposta il lettino nell'ombra';
+      nextText = WIN && now < WIN[0] ? `Alle ${fmt(WIN[0])} l'ombra arriva sul lettino da sola.` : 'Tocca Zona per vedere dove si trova l'ombra adesso.';
+    } else {
+      heroBg = '#0e2a47'; heroLabel = 'Parcheggiato'; heroTitle = 'Sole sotto l'orizzonte'; heroText = 'L'ombrellone è in posizione di riposo.'; nextTitle = 'Domani'; nextText = WIN ? `Ombra totale dalle ${fmt(WIN[0])} alle ${fmt(WIN[1])}.` : '';
+    }
+    return {
+      heroBg, heroLabel, heroTitle, heroText, nextTitle, nextText,
+      nowLabel: fmt(now), nowMin: now, nowX: (now - 360) / 900 * 318,
+      segs: segs.map(s => ({ x: (s.m - 360) / 900 * 318, w: 318 / 90 + 0.4, fill: cols[s.st] })),
+      sunElev: `${sun.elev.toFixed(0)}°`,
+      moves: String(Math.max(0, Math.round((Math.min(now, WIN ? WIN[1] : now) - (WIN ? WIN[0] : now)) / 12))),
+      scrub: (ev) => this.setState({ now: +ev.target.value }),
+    };
+  }
+}
+</script>
+</body>
+</html>
