@@ -186,7 +186,7 @@ def fig_calendar(profiles: dict[str, list[DayStat]], step_min: int, name: str, t
     handles = [plt.Rectangle((0, 0), 1, 1, color=c) for c in ["#1baf7a", "#eda100", "#e34948", GRID]]
     fig.legend(handles, ["copertura totale", "parziale (≥ 80 %)", "scoperta", "notte / sole < 5°"],
                loc="lower center", ncol=4, frameon=False, fontsize=8, bbox_to_anchor=(0.5, -0.04))
-    fig.suptitle(title + "  (tratteggio: stagione balneare 15 mag – 15 set)", fontsize=10)
+    fig.suptitle(title + "  (tratteggio: stagione balneare 15 mag – 15 set)", fontsize=10, y=1.02)
     fig.savefig(FIG / name)
     plt.close(fig)
 

@@ -190,6 +190,57 @@ inclinabile alla base, carrello a terra o rotaia).
 
 ---
 
+## 5b. Stagionalità: quando è utilizzabile (e vendibile)
+
+Analisi completa in `stagionalita.md` (`python -m ombrellone.stagionalita`).
+La fattibilità dipende solo dalla direzione del sole, quindi è stata calcolata
+una volta su una griglia elevazione × azimut e applicata a tutto l'anno e a
+diverse latitudini.
+
+![calendario](figure/10_stagionalita_calendario.png)
+
+![ore nell'anno](figure/11_stagionalita_ore.png)
+
+![latitudini](figure/12_stagionalita_latitudini.png)
+
+Rimini, ore medie al giorno di copertura totale (A = base; B = sbalzo mobile;
+C = B + palo a Sud della zona; D = braccio telescopico + sbalzo mobile):
+
+| mese | ore sole | A | B | C | D |
+|---|---|---|---|---|---|
+| apr | 12.3 | 4.4 | 6.6 | 6.8 | 7.4 |
+| mag | 13.6 | 6.0 | 7.9 | 7.7 | 8.6 |
+| giu | 14.2 | 6.5 | 8.4 | 8.1 | 9.2 |
+| lug | 13.9 | 6.2 | 8.2 | 7.8 | 8.9 |
+| ago | 12.9 | 5.2 | 7.2 | 7.2 | 8.0 |
+| set | 11.5 | 2.5 | 5.5 | 6.1 | 6.4 |
+| ott | 9.9 | 0.0 | 1.9 | 4.6 | 3.6 |
+
+| configurazione | ore/anno | giorni utili/anno (≥ 4 h) | giorni utili nella stagione balneare (123) |
+|---|---|---|---|
+| A base | 966 | 147 | 111 |
+| B sbalzo mobile | 1547 | 206 | 123 |
+| C + palo a Sud | 1849 | 254 | 123 |
+| D telescopico + sbalzo mobile | 1816 | 230 | 123 |
+
+Cosa dice per il business:
+* **Stagione balneare italiana (15 mag – 15 set)**: con lo sbalzo mobile il
+  prodotto fa il suo lavoro **tutti i giorni** (123/123), 7–9 h al giorno,
+  tipicamente dalle 9:30 alle 17:30. È il mercato "spiaggia/stabilimento".
+* **Mezze stagioni**: il progetto base è inutilizzabile da ottobre a marzo; la
+  configurazione C (sbalzo mobile + palo a Sud) regge da marzo a ottobre con
+  ≥ 4 h/giorno. Per terrazze e giardini (uso da marzo a ottobre) la
+  configurazione C è obbligatoria.
+* **Latitudine**: più si va a Sud, più la stagione si allunga. A Palermo la
+  configurazione C sta sopra le 4 h/giorno da febbraio a novembre; a Tenerife
+  (28°N) tutto l'anno. Il prodotto è "all-year" per resort e hotel dal 35°N in
+  giù: Canarie, Nord Africa, Medio Oriente, Florida, Messico.
+* Il mattino presto e il tardo pomeriggio restano scoperti ovunque: è il
+  momento di comunicarlo bene nell'app ("ombra garantita fino alle 17:30") e di
+  non promettere ciò che la geometria non permette.
+
+---
+
 ## 6. Studio meccanico-robotico
 
 ### 6.1 Masse (progetto base)
