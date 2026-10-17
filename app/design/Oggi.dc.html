@@ -119,15 +119,15 @@ class Component extends DCLogic {
       heroTitle = WIN && now < WIN[0] ? `Ombra totale dalle ${fmt(WIN[0])}` : 'Il sole è basso';
       heroText = WIN && now < WIN[0] ? `Adesso copro circa l'80 % del lettino: il braccio è già a fine corsa verso il sole.` : `Copro la parte del lettino più vicina al palo. Sposta il lettino di 60 cm verso il palo per restare all'ombra.`;
       nextTitle = WIN && now < WIN[0] ? `Dalle ${fmt(WIN[0])} ombra totale` : 'Consiglio: avvicina il lettino al palo';
-      nextText = WIN && now < WIN[0] ? 'Non devi fare niente: appena il sole sale abbastanza l'ombra si chiude sul lettino.' : 'Oppure accetta un po' di sole sui piedi: la testa resta all'ombra fino al tramonto.';
+      nextText = WIN && now < WIN[0] ? `Non devi fare niente: appena il sole sale abbastanza l'ombra si chiude sul lettino.` : `Oppure accetta un po' di sole sui piedi: la testa resta all'ombra fino al tramonto.`;
     } else if (st === 1) {
       heroBg = '#c0392b'; heroLabel = 'Scoperto';
       heroTitle = WIN && now < WIN[0] ? `Ombra totale dalle ${fmt(WIN[0])}` : 'Ombra fuori dal lettino';
-      heroText = 'Sole troppo basso per questo ombrellone: l'ombra è dal lato opposto al sole, oltre il lettino.';
-      nextTitle = WIN && now < WIN[0] ? 'Aspetta: il sole sta salendo' : 'Sposta il lettino nell'ombra';
-      nextText = WIN && now < WIN[0] ? `Alle ${fmt(WIN[0])} l'ombra arriva sul lettino da sola.` : 'Tocca Zona per vedere dove si trova l'ombra adesso.';
+      heroText = `Sole troppo basso per questo ombrellone: l'ombra è dal lato opposto al sole, oltre il lettino.`;
+      nextTitle = WIN && now < WIN[0] ? 'Aspetta: il sole sta salendo' : `Sposta il lettino nell'ombra`;
+      nextText = WIN && now < WIN[0] ? `Alle ${fmt(WIN[0])} l'ombra arriva sul lettino da sola.` : `Tocca Zona per vedere dove si trova l'ombra adesso.`;
     } else {
-      heroBg = '#0e2a47'; heroLabel = 'Parcheggiato'; heroTitle = 'Sole sotto l'orizzonte'; heroText = 'L'ombrellone è in posizione di riposo.'; nextTitle = 'Domani'; nextText = WIN ? `Ombra totale dalle ${fmt(WIN[0])} alle ${fmt(WIN[1])}.` : '';
+      heroBg = '#0e2a47'; heroLabel = 'Parcheggiato'; heroTitle = `Sole sotto l'orizzonte`; heroText = `L'ombrellone è in posizione di riposo.`; nextTitle = 'Domani'; nextText = WIN ? `Ombra totale dalle ${fmt(WIN[0])} alle ${fmt(WIN[1])}.` : '';
     }
     return {
       heroBg, heroLabel, heroTitle, heroText, nextTitle, nextText,

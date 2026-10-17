@@ -3,3 +3,6 @@ scipy>=1.11
 matplotlib>=3.8
 pytest>=7
 pvlib>=0.10   # opzionale, solo per il test di validazione del sole
+trimesh>=4.4     # generazione STL (hardware/build_parts.py)
+manifold3d>=2.5  # booleane esatte per trimesh
+rtree>=1.0       # verifiche di contenimento

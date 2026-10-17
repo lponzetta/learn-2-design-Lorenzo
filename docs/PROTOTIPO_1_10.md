@@ -97,23 +97,31 @@ Totale ≈ 155 €. Se hai già stampante 3D e un ESP32, ≈ 110 €.
 
 ## 3. Stampa 3D
 
-File in `hardware/scad/` (apri con OpenSCAD, F6, esporta STL; tutte le quote
-sono in `params.scad`, compreso il gioco `fit` da adattare alla tua stampante):
+**STL definitivi in `hardware/stl/`**, generati da `hardware/build_parts.py`
+(modellazione solida parametrica in Python: tasche servo con le quote reali
+MG996R/MG90S, giochi per i tubi, fori per le viti, transizioni a 45° per
+stampare senza supporti, ogni file già orientato per il piatto). Le istruzioni
+di stampa, le tolleranze e la viteria sono in `hardware/stl/README.md`;
+`report.md` riporta per ogni pezzo ingombro, volume, massa e sporgenze;
+`assieme_modello.png` è l'assieme di controllo.
 
-| file | parti | note di stampa |
-|---|---|---|
-| `base.scad` | base con tasca servo azimut, mozzo del palo con anello di scorrimento | PETG, 30 % riempimento; la base a faccia in giù |
-| `pole_top.scad` | cima del palo con tasca del micro servo di inclinazione | asse del servo orizzontale |
-| `arm.scad` | radice del braccio (sulla squadretta) e terminale con tasca del servo testa | |
-| `hub.scad` | mozzo del tettuccio con sbalzo 50 mm, 8 fori per le stecche, 4 fori M3 per il disco | |
-| `demo_rig.scad` | mozzo piattaforma, supporto servo piattaforma, colonna perno lampada, radice braccio lampada, porta-lampada | la colonna in ABS/ASA se la lampada scalda |
+| file | parte |
+|---|---|
+| `01_base` | base del modello con tasca MG996R 270° (azimut) e 4 fori M4 |
+| `02_pole_hub` | mozzo del palo sulla squadretta, alloggio tubo Ø10 |
+| `03_pole_top` | cima del palo: tasca MG90S ad albero orizzontale (inclinazione) |
+| `04_arm_root` | radice del braccio sulla squadretta MG90S, alloggio tubo Ø8 |
+| `05_arm_tip` | punta del braccio: tasca MG90S (testa), albero perpendicolare al piano del braccio |
+| `06_hub_centrato` / `06b_hub_sbalzo50` | mozzo del tettuccio: piastra 40×40 (disco forex) + 8 stecche Ø2 |
+| `07`–`11` | banco demo: mozzo e supporto servo della piattaforma, colonna, attacco e porta-LED del braccio lampada |
 
-Tempo totale di stampa ≈ 8 ore, ≈ 150 g di filamento. Convenzione: i tubi in
-carbonio si **incollano** nei manicotti (epossidica), i servo si avvitano
-nelle tasche con le viti in dotazione, le squadrette rotonde si fissano con le
-loro viti nei fori predisposti.
+I sorgenti OpenSCAD in `hardware/scad/` restano come riferimento modificabile,
+ma gli STL ufficiali sono quelli generati dallo script (con `python
+hardware/build_parts.py` li rigeneri dopo aver cambiato un gioco o una quota).
 
----
+Convenzione: i tubi in carbonio si **incollano** nei manicotti (epossidica), i
+servo si avvitano nelle tasche con viti autofilettanti, le squadrette rotonde si
+fissano nelle sedi predisposte.
 
 ## 4. Montaggio (ordine consigliato)
 
