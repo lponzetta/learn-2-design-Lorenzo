@@ -1,5 +1,5 @@
 {
-  "generato": "2026-10-17 13:58",
+  "generato": "2026-10-17 14:03",
   "progetto_base": {
     "H": 2.0,
     "L": 1.6,
@@ -85,72 +85,82 @@
       "min_elev_S": 44.0,
       "min_elev_SE": 44.0,
       "min_elev_E": 44.0,
-      "ore_copertura_totale_15lug": 6.5,
-      "da": "10:05",
-      "a": "16:30"
+      "ore_copertura_totale_15lug": 6.75,
+      "da": "10:00",
+      "a": "16:30",
+      "buchi": []
     },
     {
       "variante": "+ sbalzo tettuccio 0.6 m",
       "min_elev_S": 38.0,
       "min_elev_SE": 38.0,
       "min_elev_E": 38.0,
-      "ore_copertura_totale_15lug": 7.666666666666667,
-      "da": "09:30",
-      "a": "17:05"
+      "ore_copertura_totale_15lug": 8.25,
+      "da": "09:15",
+      "a": "17:15",
+      "buchi": []
     },
     {
       "variante": "+ braccio telescopico 1.2–2.4 m",
       "min_elev_S": 38.0,
       "min_elev_SE": 38.0,
       "min_elev_E": 38.0,
-      "ore_copertura_totale_15lug": 7.666666666666667,
+      "ore_copertura_totale_15lug": 7.75,
       "da": "09:30",
-      "a": "17:05"
+      "a": "17:00",
+      "buchi": []
     },
     {
       "variante": "+ tettuccio R 1.8 m",
       "min_elev_S": 41.0,
       "min_elev_SE": 41.0,
       "min_elev_E": 41.0,
-      "ore_copertura_totale_15lug": 7.083333333333333,
-      "da": "09:45",
-      "a": "16:45"
+      "ore_copertura_totale_15lug": 7.75,
+      "da": "09:30",
+      "a": "17:00",
+      "buchi": []
     },
     {
       "variante": "+ palo più basso H 1.6",
       "min_elev_S": 41.0,
       "min_elev_SE": 41.0,
       "min_elev_E": 41.0,
-      "ore_copertura_totale_15lug": 7.083333333333333,
+      "ore_copertura_totale_15lug": 7.25,
       "da": "09:45",
-      "a": "16:45"
+      "a": "16:45",
+      "buchi": []
     },
     {
       "variante": "palo a SUD della zona (zona 1.2 m a Nord del palo)",
       "min_elev_S": 32.0,
       "min_elev_SE": 41.0,
       "min_elev_E": 56.0,
-      "ore_copertura_totale_15lug": 8.75,
-      "da": "08:55",
-      "a": "17:35"
+      "ore_copertura_totale_15lug": 6.25,
+      "da": "10:15",
+      "a": "16:15",
+      "buchi": []
     },
     {
       "variante": "palo a Sud della zona + sbalzo 0.6",
-      "min_elev_S": 74.0,
+      "min_elev_S": 26.0,
       "min_elev_SE": 32.0,
       "min_elev_E": 41.0,
-      "ore_copertura_totale_15lug": 0.0,
-      "da": "-",
-      "a": "-"
+      "ore_copertura_totale_15lug": 7.75,
+      "da": "09:30",
+      "a": "17:00",
+      "buchi": []
     },
     {
       "variante": "palo a Sud della zona + sbalzo 0.6 + telescopico 1.2–2.4",
-      "min_elev_S": 71.0,
+      "min_elev_S": 26.0,
       "min_elev_SE": 29.0,
       "min_elev_E": 35.0,
-      "ore_copertura_totale_15lug": 0.0,
-      "da": "-",
-      "a": "-"
+      "ore_copertura_totale_15lug": 8.5,
+      "da": "09:00",
+      "a": "17:30",
+      "buchi": [
+        "13:15–13:30"
+      ]
     },
     {
       "variante": "palo a NORD della zona (zona 1.2 m a Sud del palo)",
@@ -159,7 +169,8 @@
       "min_elev_E": 56.0,
       "ore_copertura_totale_15lug": 0.0,
       "da": "-",
-      "a": "-"
+      "a": "-",
+      "buchi": []
     }
   ],
   "meccanica": {
@@ -171,48 +182,48 @@
       "elettronica": 1.0
     },
     "carichi_lavoro_8ms": {
-      "coppia_inclinazione_Nm": 253.33625150193362,
-      "coppia_azimut_Nm": 3.394801219719869,
-      "coppia_tettuccio_Nm": 72.73572391223769,
-      "momento_base_Nm": 192.90300084845552,
-      "forza_vento_tettuccio_N": 204.0215879330234
+      "coppia_inclinazione_Nm": 238.17307727420953,
+      "coppia_azimut_Nm": 92.66103578488902,
+      "coppia_tettuccio_Nm": 75.64629470820844,
+      "momento_base_Nm": 263.48386948550353,
+      "forza_vento_tettuccio_N": 222.50379864078457
     },
     "carichi_parcheggio_15ms": {
-      "coppia_inclinazione_Nm": 12.700799999999997,
-      "momento_base_Nm": 70.9128
+      "coppia_inclinazione_Nm": 168.5630655262236,
+      "momento_base_Nm": 421.6028974340032
     },
     "zavorra_kg": {
-      "base_r0.4_lavoro_8ms": 79.59108814160008,
-      "base_r0.5_lavoro_8ms": 60.43715634000687,
-      "base_r0.6_lavoro_8ms": 47.667868472278066
+      "base_r0.4_lavoro_8ms": 106.57154251356033,
+      "base_r0.5_lavoro_8ms": 82.02151983757507,
+      "base_r0.6_lavoro_8ms": 65.6548380535849
     },
-    "zavorra_parcheggio_15ms_r0.5": 5.507300693267061,
+    "zavorra_parcheggio_15ms_r0.5": 112.75197880764114,
     "motori": {
       "azimut_stepper_vite_senza_fine": {
         "joint": "azimut",
-        "holding_torque_Nm": 3.394801219719869,
-        "design_torque_Nm": 6.789602439439738,
+        "holding_torque_Nm": 92.66103578488902,
+        "design_torque_Nm": 185.32207156977805,
         "output_speed_rpm": 0.5,
-        "gear_ratio": 60,
-        "motor_torque_Nm": 0.2514667570162866,
-        "power_W": 0.7900061164644155,
-        "suggestion": "NEMA17 stepper (0.4-0.5 Nm) o DC 12V 30-50 W con riduttore"
+        "gear_ratio": 400,
+        "motor_torque_Nm": 1.1582629473111128,
+        "power_W": 24.258602441319024,
+        "suggestion": "NEMA23 stepper (1.2-1.9 Nm) o DC 24V 60-100 W"
       },
       "inclinazione_attuatore_lineare": {
         "giunto": "inclinazione",
-        "forza_N": 3377.8166866924485,
-        "corsa_mm": 172.0729309053138,
-        "velocita_mm_s": 4.301823272632845,
-        "braccio_leva_m": 0.15,
+        "forza_N": 1905.3846181936763,
+        "corsa_mm": 286.788218175523,
+        "velocita_mm_s": 7.169705454388076,
+        "braccio_leva_m": 0.25,
         "suggerimento": "attuatore 12/24 V classe 3000-6000 N"
       },
       "tettuccio_attuatore_lineare": {
         "giunto": "tettuccio",
-        "forza_N": 1818.3930978059423,
-        "corsa_mm": 91.77222981616737,
-        "velocita_mm_s": 3.059074327205579,
-        "braccio_leva_m": 0.08,
-        "suggerimento": "attuatore 12/24 V classe 3000-6000 N"
+        "forza_N": 1260.7715784701409,
+        "corsa_mm": 137.65834472425104,
+        "velocita_mm_s": 4.588611490808368,
+        "braccio_leva_m": 0.12,
+        "suggerimento": "attuatore 12/24 V classe 1500 N"
       }
     }
   },
@@ -222,185 +233,185 @@
       "D_mm": 40.0,
       "t_mm": 3.0,
       "massa_kg": 1.5064565092493776,
-      "freccia_mm": 50.60580630218919,
-      "tensione_MPa": 82.76385930129102,
-      "coeff_sicurezza": 2.899816441936466
+      "freccia_mm": 47.48384394043668,
+      "tensione_MPa": 77.71506079439439,
+      "coeff_sicurezza": 3.0882044940420514
     },
     {
       "materiale": "Al 6061-T6",
       "D_mm": 50.0,
       "t_mm": 3.0,
       "massa_kg": 1.913606917154615,
-      "freccia_mm": 24.977723333041716,
-      "tensione_MPa": 51.2102635817511,
-      "coeff_sicurezza": 4.686560529353037
+      "freccia_mm": 23.450793062563104,
+      "tensione_MPa": 48.123597898264066,
+      "coeff_sicurezza": 4.987158285782646
     },
     {
       "materiale": "Al 6061-T6",
       "D_mm": 60.0,
       "t_mm": 3.0,
       "massa_kg": 2.3207573250598528,
-      "freccia_mm": 14.148535066336668,
-      "tensione_MPa": 34.90796815461163,
-      "coeff_sicurezza": 6.875221122495897
+      "freccia_mm": 13.29139327783057,
+      "tensione_MPa": 32.82872967546208,
+      "coeff_sicurezza": 7.310669720473181
     },
     {
       "materiale": "Al 6061-T6",
       "D_mm": 70.0,
       "t_mm": 3.0,
       "massa_kg": 2.7279077329650923,
-      "freccia_mm": 8.796970990363757,
-      "tensione_MPa": 25.391915878589025,
-      "coeff_sicurezza": 9.451827154262624
+      "freccia_mm": 8.268788073324961,
+      "tensione_MPa": 23.89711695907884,
+      "coeff_sicurezza": 10.04305249084956
     },
     {
       "materiale": "Al 6061-T6",
       "D_mm": 80.0,
       "t_mm": 3.0,
       "massa_kg": 3.135058140870331,
-      "freccia_mm": 5.849947435042657,
-      "tensione_MPa": 19.35014215504564,
-      "coeff_sicurezza": 12.403009656309884
+      "freccia_mm": 5.501812436209884,
+      "tensione_MPa": 18.224143018195893,
+      "coeff_sicurezza": 13.16934353293716
     },
     {
       "materiale": "Acciaio S235",
       "D_mm": 40.0,
       "t_mm": 2.0,
       "massa_kg": 2.9988386834106713,
-      "freccia_mm": 23.88722327844485,
-      "tensione_MPa": 120.1286654316171,
-      "coeff_sicurezza": 1.9562358339340171
+      "freccia_mm": 22.46145974988515,
+      "tensione_MPa": 113.11123556448732,
+      "coeff_sicurezza": 2.0776008574852947
     },
     {
       "materiale": "Acciaio S235",
       "D_mm": 50.0,
       "t_mm": 2.0,
       "massa_kg": 3.788006757992436,
-      "freccia_mm": 12.068112315241157,
-      "tensione_MPa": 76.25381161094884,
-      "coeff_sicurezza": 3.0818131583898123
+      "freccia_mm": 11.359966622763283,
+      "tensione_MPa": 71.89705588574319,
+      "coeff_sicurezza": 3.2685622116913313
     },
     {
       "materiale": "Acciaio S235",
       "D_mm": 60.0,
       "t_mm": 2.0,
       "massa_kg": 4.5771748325741894,
-      "freccia_mm": 6.959706649757382,
-      "tensione_MPa": 53.032321991736254,
-      "coeff_sicurezza": 4.43125986519351
+      "freccia_mm": 6.558101213217387,
+      "tensione_MPa": 50.06734435478083,
+      "coeff_sicurezza": 4.693678145474882
     },
     {
       "materiale": "Acciaio S235",
       "D_mm": 70.0,
       "t_mm": 2.0,
       "massa_kg": 5.366342907155943,
-      "freccia_mm": 4.391809817634141,
-      "tensione_MPa": 39.22889639676773,
-      "coeff_sicurezza": 5.990482057490735
+      "freccia_mm": 4.142524100276024,
+      "tensione_MPa": 37.081728401554265,
+      "coeff_sicurezza": 6.337352926357934
     },
     {
       "materiale": "Acciaio S235",
       "D_mm": 80.0,
       "t_mm": 2.0,
       "massa_kg": 6.155510981737702,
-      "freccia_mm": 2.9581170564777794,
-      "tensione_MPa": 30.33613072162001,
-      "coeff_sicurezza": 7.746538349154719
+      "freccia_mm": 2.792909307742418,
+      "tensione_MPa": 28.709866945006294,
+      "coeff_sicurezza": 8.18533922327617
     },
     {
       "materiale": "CFRP",
       "D_mm": 40.0,
       "t_mm": 2.0,
       "massa_kg": 0.6112282666824298,
-      "freccia_mm": 43.232306760971916,
-      "tensione_MPa": 111.9798171576637,
-      "coeff_sicurezza": 4.465090341199765
+      "freccia_mm": 40.51039457008522,
+      "tensione_MPa": 104.96238729053394,
+      "coeff_sicurezza": 4.763611164978644
     },
     {
       "materiale": "CFRP",
       "D_mm": 50.0,
       "t_mm": 2.0,
       "massa_kg": 0.7720778105462289,
-      "freccia_mm": 21.551865618911215,
-      "tensione_MPa": 69.86325035624536,
-      "coeff_sicurezza": 7.156838501650146
+      "freccia_mm": 20.19995111508982,
+      "tensione_MPa": 65.5064946310397,
+      "coeff_sicurezza": 7.632830955406965
     },
     {
       "materiale": "CFRP",
       "D_mm": 60.0,
       "t_mm": 2.0,
       "massa_kg": 0.9329273544100259,
-      "freccia_mm": 12.267534780874803,
-      "tensione_MPa": 47.777185872072735,
-      "coeff_sicurezza": 10.465245930113806
+      "freccia_mm": 11.500833492934813,
+      "tensione_MPa": 44.81220823511731,
+      "coeff_sicurezza": 11.157673761057206
     },
     {
       "materiale": "CFRP",
       "D_mm": 70.0,
       "t_mm": 2.0,
       "massa_kg": 1.0937768982738227,
-      "freccia_mm": 7.642663416241779,
-      "tensione_MPa": 34.76710263570509,
-      "coeff_sicurezza": 14.381411221955274
+      "freccia_mm": 7.166754319467193,
+      "tensione_MPa": 32.61993464049163,
+      "coeff_sicurezza": 15.328050332122439
     },
     {
       "materiale": "CFRP",
       "D_mm": 80.0,
       "t_mm": 2.0,
       "massa_kg": 1.2546264421376208,
-      "freccia_mm": 5.083485337390706,
-      "tensione_MPa": 26.45980604991025,
-      "coeff_sicurezza": 18.89658597862988
+      "freccia_mm": 4.768088726168651,
+      "tensione_MPa": 24.833542273296533,
+      "coeff_sicurezza": 20.134058786194554
     },
     {
       "materiale": "GFRP",
       "D_mm": 40.0,
       "t_mm": 3.0,
       "massa_kg": 1.0600990250273397,
-      "freccia_mm": 98.76364069088012,
-      "tensione_MPa": 81.66782146784573,
-      "coeff_sicurezza": 3.673417444080054
+      "freccia_mm": 92.60891489199659,
+      "tensione_MPa": 76.6190229609491,
+      "coeff_sicurezza": 3.915476710697589
     },
     {
       "materiale": "GFRP",
       "D_mm": 50.0,
       "t_mm": 3.0,
       "massa_kg": 1.3466122750347291,
-      "freccia_mm": 48.61921744211989,
-      "tensione_MPa": 50.35908000731038,
-      "coeff_sicurezza": 5.957217644890464
+      "freccia_mm": 45.608983480319196,
+      "tensione_MPa": 47.27241432382335,
+      "coeff_sicurezza": 6.346195858433496
     },
     {
       "materiale": "GFRP",
       "D_mm": 60.0,
       "t_mm": 3.0,
       "massa_kg": 1.6331255250421184,
-      "freccia_mm": 27.468982685951172,
-      "tensione_MPa": 34.212599768567614,
-      "coeff_sicurezza": 8.768699310469271
+      "freccia_mm": 25.779188874324863,
+      "tensione_MPa": 32.133361289418055,
+      "coeff_sicurezza": 9.336091462638052
     },
     {
       "materiale": "GFRP",
       "D_mm": 70.0,
       "t_mm": 3.0,
       "massa_kg": 1.9196387750495092,
-      "freccia_mm": 17.035600750858617,
-      "tensione_MPa": 24.804300219328614,
-      "coeff_sicurezza": 12.094677025648426
+      "freccia_mm": 15.994325857267851,
+      "tensione_MPa": 23.30950129981843,
+      "coeff_sicurezza": 12.870288220294823
     },
     {
       "materiale": "GFRP",
       "D_mm": 80.0,
       "t_mm": 3.0,
       "massa_kg": 2.2061520250568996,
-      "freccia_mm": 11.300203429134116,
-      "tensione_MPa": 18.841438842655062,
-      "coeff_sicurezza": 15.92235086212371
+      "freccia_mm": 10.613880145720938,
+      "tensione_MPa": 17.715439705805316,
+      "coeff_sicurezza": 16.934380686113627
     }
   ],
   "fem": {
-    "freccia_punta_mm": 24.041733745098433,
-    "sigma_max_MPa": 35.276448270084714,
+    "freccia_punta_mm": 19.37653302643836,
+    "sigma_max_MPa": 33.24567814713745,
     "sigma_amm_Al_MPa": 240.0
   },
   "scala_mini": {

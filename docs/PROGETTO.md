@@ -145,42 +145,48 @@ l'ombra "scappa" verso il lato opposto al sole. Non è un difetto del software:
 
 ## 5. Cosa aiuta davvero (classifica delle leve)
 
-Dallo sweep sulle varianti (`figure/06_varianti.png` e `risultati.md`):
+Misurato come **ore di copertura totale** in un giorno reale (`figure/06_varianti.png`,
+tabella completa in `risultati.md`), zona r = 1 m:
 
-1. **Posizione del palo: mettilo sul lato del sole (a Sud della zona).**
-   Zona 1.2 m a Nord del palo: elevazione minima **31°** a mezzogiorno invece di
-   44°. È la leva gratis. Attenzione: di mattina/sera (sole a Est/Ovest) il
-   vantaggio si riduce, per questo l'app suggerisce l'orientamento.
-   Mettere il palo a Nord della zona è invece la scelta peggiore (71°).
-2. **Sbalzo orizzontale del tettuccio** (il centro del tettuccio è spostato di
-   0.6 m lungo il braccio, come negli ombrelloni "a braccio"): da 44° a 36°.
-   È più efficiente dell'allungare il braccio perché **non alza il tettuccio**.
-   Controindicazione: uno sbalzo fisso crea una **zona morta** vicino al palo
-   quando il sole è alto (il centro del tettuccio non può avvicinarsi al palo
-   meno dello sbalzo). Soluzione: sbalzo **telescopico** (terzo grado di libertà
-   lineare) oppure sbalzo ≤ R − r_t così il margine lo assorbe.
-3. **Braccio telescopico 1.2–2.4 m**: da 44° a 38°. Buono ma pesa e costa.
-4. **Tettuccio più grande (R 1.8)**: 39°. Semplice, ma vento e coppie salgono
-   col quadrato del raggio.
-5. **θ_max 85°** (braccio quasi orizzontale): 39°. Serve un braccio molto
-   rigido e un attuatore più forte.
-6. **Palo più basso (H 1.6)**: 41°. La quota conta poco perché il tettuccio
-   deve comunque stare sopra le teste.
-7. **Abbassare h_min** non serve a niente: il limite è lo sbraccio, non la quota.
+| configurazione | 15 luglio | 21 settembre |
+|---|---|---|
+| progetto base (tutto fisso, zona centrata) | 6.8 h (10:00–16:30) | 2.3 h (12:00–14:00) |
+| + sbalzo fisso 0.6 m | 8.2 h (09:15–17:15) | – |
+| + **sbalzo mobile 0–0.8 m** (carrello sotto il tettuccio) | 8.3 h (09:15–17:15) | 5.3 h (10:30–15:30) |
+| + braccio telescopico 1.2–2.4 m | 7.8 h | – |
+| + tettuccio R 1.8 m | 7.8 h | – |
+| + palo più basso H 1.6 | 7.2 h | – |
+| palo a Sud della zona (zona 1.2 m a Nord) | 6.2 h | 4.8 h |
+| palo a Sud + sbalzo mobile 0–0.8 | 8.3 h | **6.3 h** (10:00–16:00) |
+| palo a Sud + sbalzo 0.6 + braccio telescopico | 8.5 h (con un buco di 15 min a mezzogiorno) | – |
+| palo a Nord della zona | 0 h | 0 h |
+| nel simulatore web: braccio telescopico 1.6–2.4 **e** sbalzo mobile 0–0.8 | 9.3 h (08:40–18:00) | – |
+
+Lettura:
+
+1. **Sbalzo orizzontale del tettuccio** (il centro del tettuccio scorre lungo il
+   braccio, come negli ombrelloni "a braccio"): è la leva che rende di più per
+   euro speso, perché avvicina il tettuccio al sole **senza alzarlo**. Fisso
+   a 0.6 m va già bene; **mobile** (carrello con cinghia e stepper) è meglio
+   perché con sole alto resta corto e non crea la "zona morta" vicino al palo.
+2. **Posizione del palo**: mettilo sul lato del sole (a Sud della zona). A
+   luglio non allunga la giornata (di mattina e sera il sole è a Est/Ovest, e lo
+   spostamento Nord-Sud non aiuta), ma a settembre raddoppia le ore (2.3 → 4.8 h)
+   perché il sole resta basso e a Sud. Il palo a Nord della zona è la scelta
+   peggiore: zero ore. L'app deve dirlo all'installazione.
+3. **Braccio telescopico**: buono (7.8 h) ma pesa, costa e alza il tettuccio.
+4. **Tettuccio più grande** (R 1.8): 7.8 h, ma vento e coppie salgono col
+   quadrato del raggio.
+5. **Palo più basso**: poco (7.2 h); **palo telescopico**: niente. L'altezza
+   non è una leva, perché l'ombra scappa di `z / tan h`.
+6. **Abbassare h_min** non serve a niente: il limite è lo sbraccio, non la quota.
 
 **Gradi di libertà "mobili" (nel simulatore: casella "telescopico"/"mobile").**
-Invece di fissare L e sbalzo, si dà un intervallo e il solver sceglie il valore
-migliore istante per istante (piccolo con sole alto, massimo con sole basso):
-così non c'è zona morta. Sul 15 luglio a Rimini, zona centrata:
-
-| gradi di libertà | finestra di copertura totale |
-|---|---|
-| progetto base (tutto fisso) | 10:00–16:40 (6.7 h) |
-| + braccio telescopico 1.6–2.4 m | 09:30–17:20 (7.8 h) |
-| + sbalzo mobile 0–0.8 m (carrello sotto il tettuccio) | **08:40–18:00 (9.3 h)** |
-| + palo telescopico 2.0–2.6 m | nessun guadagno (l'altezza non aiuta) |
-
-Oltre si va solo con un meccanismo diverso (sezione 10: carrello a terra o rotaia).
+Invece di fissare L e sbalzo si dà un intervallo e il solver sceglie il valore
+migliore istante per istante (corto con sole alto, massimo con sole basso).
+Con braccio telescopico **e** sbalzo mobile insieme la finestra di luglio passa
+da 6.7 a 9.3 h. Oltre si va solo con un meccanismo diverso (sezione 10: palo
+inclinabile alla base, carrello a terra o rotaia).
 
 ---
 
