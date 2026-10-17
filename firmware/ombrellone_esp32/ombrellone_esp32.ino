@@ -42,6 +42,15 @@ unsigned long lastMoveMs = 0;
 Preferences prefs;
 WebServer server(80);
 Servo sAlpha, sTheta, sBeta, sGamma;
+#if DEMO_RIG
+Servo sTable, sLamp;
+#endif
+// modalita' demo: tempo accelerato (giornata in pochi minuti) e sole artificiale
+struct Demo { bool on = false; float speed = DEMO_SPEED_DEFAULT; time_t t0 = 0; unsigned long ms0 = 0; } demo;
+static time_t currentEpoch() {
+  if (demo.on) return demo.t0 + (time_t)((millis() - demo.ms0) / 1000.0f * demo.speed);
+  return time(nullptr);
+}
 
 // ---------------------------------------------------------------- utilita'
 static const float DEG = 3.14159265358979f / 180.0f;
@@ -175,8 +184,9 @@ static float score(const Eval& e) {   // da massimizzare
 }
 
 // Posa ottima: analitica -> saturazione -> discesa a coordinate sui 4 giunti.
-static Pose solvePose(const SunPos& sp, Eval& bestEval) {
-  Vec3 s = sunVec(sp);
+static Pose solvePoseVec(Vec3 s, const SunPos& sp, Eval& bestEval);
+static Pose solvePose(const SunPos& sp, Eval& bestEval) { return solvePoseVec(sunVec(sp), sp, bestEval); }
+static Pose solvePoseVec(Vec3 s, const SunPos& sp, Eval& bestEval) {
   Pose p;
   if (!analyticPose(s, sp, p)) { p.alpha = sp.az; p.theta = THETA_MAX; p.beta = fminf(90 - sp.elev, BETA_MAX); p.gamma = sp.az; }
   p.theta = clampf(p.theta, 0, THETA_MAX);
@@ -214,19 +224,77 @@ static void writeServos(const Pose& p) {
   float gRel = fmodf(p.gamma - NORTH_OFFSET - p.alpha + 540.0f, 360.0f) - 180.0f;  // testa relativa al braccio
   sAlpha.write(constrain(90 + aRel * (180.0f / ALPHA_SERVO_RANGE) * ALPHA_SIGN + ALPHA_TRIM, 0, 180));
   sTheta.write(constrain(THETA_SERVO_ZERO + p.theta * THETA_SIGN, 0, 180));
+#if HEAD_ON_ARM
+  sBeta.write(constrain(BETA_SERVO_ZERO + (p.beta - p.theta) * BETA_SIGN, 0, 180));  // zero = normale lungo il braccio
+#else
   sBeta.write(constrain(BETA_SERVO_ZERO + p.beta * BETA_SIGN, 0, 180));
+#endif
+#if HEAD_PAN_SERVO
   sGamma.write(constrain(90 + gRel * GAMMA_SIGN + GAMMA_TRIM, 0, 180));
+#else
+  (void)gRel;
+#endif
 }
+
+#if DEMO_RIG
+// Posizione della lampada nel riferimento del modello per il sole (elev, az):
+// la piattaforma ruota il modello di -(az - TABLE_AZ_CENTER), quindi nel
+// riferimento del modello la lampada sta all'azimut az.  Il braccio (lunghezza
+// LAMP_ARM_L) ruota attorno a un perno a distanza LAMP_PIVOT_OFF e quota
+// LAMP_PIVOT_H: si cerca l'angolo phi del braccio che da' l'elevazione voluta.
+static float lampPhiForElev(float elevDeg) {
+  float lo = -10, hi = 95;                          // bisezione su phi (gradi)
+  for (int i = 0; i < 30; i++) {
+    float phi = 0.5f * (lo + hi);
+    float r = LAMP_PIVOT_OFF + LAMP_ARM_L * cosf(phi * DEG), z = LAMP_PIVOT_H + LAMP_ARM_L * sinf(phi * DEG);
+    float e = atan2f(z, r) / DEG;
+    if (e < elevDeg) lo = phi; else hi = phi;
+  }
+  return 0.5f * (lo + hi);
+}
+static Vec3 lampPosition(const SunPos& sp, float& phiOut) {
+  float phi = lampPhiForElev(sp.elev); phiOut = phi;
+  float r = LAMP_PIVOT_OFF + LAMP_ARM_L * cosf(phi * DEG), z = LAMP_PIVOT_H + LAMP_ARM_L * sinf(phi * DEG);
+  return { r * sinf(sp.az * DEG), r * cosf(sp.az * DEG), z };
+}
+static void writeRig(const SunPos& sp, float phi) {
+  float aRel = fmodf(sp.az - TABLE_AZ_CENTER + 540.0f, 360.0f) - 180.0f;
+  sTable.write(constrain(90 + aRel * (180.0f / TABLE_SERVO_RANGE) * TABLE_SIGN + TABLE_TRIM, 0, 180));
+  sLamp.write(constrain(LAMP_SERVO_ZERO + phi * LAMP_SIGN, 0, 180));
+}
+// La lampada e' una sorgente puntiforme a 0.6-0.8 m, non il sole all'infinito:
+// il "vettore sole" corretto va dal centro del tettuccio alla lampada.  Si
+// itera 2 volte (posa -> centro tettuccio -> vettore -> posa).
+static Pose solveForLamp(const SunPos& sp, Eval& e) {
+  float phi; Vec3 Lp = lampPosition(sp, phi);
+  Vec3 s = sunVec(sp); Pose p = solvePoseVec(s, sp, e);
+  for (int it = 0; it < 2; it++) {
+    Vec3 ad = dirv(p.alpha, p.theta);
+    Vec3 C = { ARM_L * ad.x + CANOPY_OFFSET * sinf(p.alpha * DEG), ARM_L * ad.y + CANOPY_OFFSET * cosf(p.alpha * DEG), POLE_H + ARM_L * ad.z };
+    Vec3 d = { Lp.x - C.x, Lp.y - C.y, Lp.z - C.z }; float n = sqrtf(d.x*d.x + d.y*d.y + d.z*d.z);
+    s = { d.x / n, d.y / n, d.z / n };
+    SunPos spEff; spEff.elev = asinf(s.z) / DEG; spEff.az = fmodf(atan2f(s.x, s.y) / DEG + 360.0f, 360.0f); spEff.up = true;
+    p = solvePoseVec(s, spEff, e);
+  }
+  writeRig(sp, phi);
+  return p;
+}
+#endif
 
 static void park() { held = Pose{180, 0, 0, 180}; writeServos(held); parked = true; }
 
 // ---------------------------------------------------------------- controllo
 static void controlStep() {
-  time_t now = time(nullptr);
+  time_t now = currentEpoch();
   if (now < 1600000000) return;              // ora non ancora sincronizzata
   SunPos sp = sunPosition(now, LATITUDE, LONGITUDE);
   if (sp.elev < MIN_SUN_ELEV) { if (!parked) park(); fullCoverage = false; return; }
-  Eval ei; ideal = solvePose(sp, ei);
+  Eval ei;
+#if DEMO_RIG
+  if (demo.on) ideal = solveForLamp(sp, ei); else ideal = solvePose(sp, ei);
+#else
+  ideal = solvePose(sp, ei);
+#endif
   idealMargin = ei.margin; idealCoverage = ei.coverage; fullCoverage = ei.feasible && ei.margin >= 0;
   Eval eh = evaluatePose(held, sunVec(sp));
   heldMargin = eh.margin; heldCoverage = eh.coverage;
@@ -234,6 +302,7 @@ static void controlStep() {
   bool urgent = eh.coverage < 0.97f;
   bool better = ei.coverage > eh.coverage + 0.02f || ei.margin > eh.margin + 0.02f;
   bool waited = millis() - lastMoveMs > MIN_HOLD_MS;
+  if (demo.on) waited = (millis() - lastMoveMs) > (unsigned long)(MIN_HOLD_MS / demo.speed);  // isteresi scalata col tempo accelerato
   if (need && (better || parked) && (waited || urgent)) {
     held = ideal; writeServos(held); lastMoveMs = millis(); parked = false;
   }
@@ -241,7 +310,7 @@ static void controlStep() {
 
 // Prossimo orario (oggi) in cui la copertura totale smette di essere possibile.
 static String coverageWindowToday() {
-  time_t now = time(nullptr); struct tm lt; localtime_r(&now, &lt);
+  time_t now = currentEpoch(); struct tm lt; localtime_r(&now, &lt);
   lt.tm_hour = 0; lt.tm_min = 0; lt.tm_sec = 0; time_t t0 = mktime(&lt);
   int first = -1, last = -1;
   Target saved = target;
@@ -261,14 +330,14 @@ static String coverageWindowToday() {
 static void handleRoot() { server.send_P(200, "text/html", WEBPAGE); }
 
 static void handleStatus() {
-  time_t now = time(nullptr); SunPos sp = sunPosition(now, LATITUDE, LONGITUDE);
+  time_t now = currentEpoch(); SunPos sp = sunPosition(now, LATITUDE, LONGITUDE);
   String j = "{";
   j += "\"sun\":{\"elev\":" + String(sp.elev, 1) + ",\"az\":" + String(sp.az, 1) + "},";
   j += "\"target\":{\"x\":" + String(target.x, 3) + ",\"y\":" + String(target.y, 3) + ",\"r\":" + String(target.r, 3) + "},";
   j += "\"held\":{\"alpha\":" + String(held.alpha, 1) + ",\"theta\":" + String(held.theta, 1) + ",\"beta\":" + String(held.beta, 1) + ",\"gamma\":" + String(held.gamma, 1) + "},";
   j += "\"margin\":" + String(heldMargin, 3) + ",\"coverage\":" + String(heldCoverage, 3) + ",";
   j += "\"idealCoverage\":" + String(idealCoverage, 3) + ",\"full\":" + String(fullCoverage ? "true" : "false") + ",";
-  j += "\"parked\":" + String(parked ? "true" : "false") + ",";
+  j += "\"parked\":" + String(parked ? "true" : "false") + ",\"demo\":" + String(demo.on ? "true" : "false") + ",\"speed\":" + String(demo.speed, 0) + ",";
   j += "\"geom\":{\"H\":" + String(POLE_H, 3) + ",\"L\":" + String(ARM_L, 3) + ",\"R\":" + String(CANOPY_R, 3) + ",\"thetaMax\":" + String(THETA_MAX, 0) + "},";
   j += "\"time\":" + String((long)now) + "}";
   server.send(200, "application/json", j);
@@ -282,6 +351,19 @@ static void handleSet() {
   lastMoveMs = 0; parked = true;   // forza il riposizionamento
   controlStep();
   server.send(200, "application/json", "{\"ok\":true,\"window\":\"" + coverageWindowToday() + "\"}");
+}
+
+// /demo?on=1&speed=240&date=2026-07-15&hour=6  -> giornata accelerata dalle 6 del giorno indicato
+// /demo?on=0 -> torna all'ora reale
+static void handleDemo() {
+  if (server.hasArg("on") && server.arg("on").toInt() == 0) { demo.on = false; parked = true; lastMoveMs = 0; server.send(200, "application/json", "{\"demo\":false}"); return; }
+  demo.speed = server.hasArg("speed") ? server.arg("speed").toFloat() : DEMO_SPEED_DEFAULT;
+  struct tm lt; time_t base = time(nullptr); localtime_r(&base, &lt);
+  if (server.hasArg("date")) { String d = server.arg("date"); lt.tm_year = d.substring(0, 4).toInt() - 1900; lt.tm_mon = d.substring(5, 7).toInt() - 1; lt.tm_mday = d.substring(8, 10).toInt(); }
+  lt.tm_hour = server.hasArg("hour") ? server.arg("hour").toInt() : 6; lt.tm_min = 0; lt.tm_sec = 0;
+  demo.t0 = mktime(&lt); demo.ms0 = millis(); demo.on = true; parked = true; lastMoveMs = 0;
+  controlStep();
+  server.send(200, "application/json", "{\"demo\":true,\"speed\":" + String(demo.speed, 0) + "}");
 }
 
 static void handleWindow() { server.send(200, "application/json", "{\"window\":\"" + coverageWindowToday() + "\"}"); }
@@ -310,7 +392,14 @@ void setup() {
   ESP32PWM::allocateTimer(0); ESP32PWM::allocateTimer(1); ESP32PWM::allocateTimer(2); ESP32PWM::allocateTimer(3);
   sAlpha.setPeriodHertz(50); sTheta.setPeriodHertz(50); sBeta.setPeriodHertz(50); sGamma.setPeriodHertz(50);
   sAlpha.attach(PIN_SERVO_ALPHA, 500, 2500); sTheta.attach(PIN_SERVO_THETA, 500, 2500);
-  sBeta.attach(PIN_SERVO_BETA, 500, 2500);   sGamma.attach(PIN_SERVO_GAMMA, 500, 2500);
+  sBeta.attach(PIN_SERVO_BETA, 500, 2500);
+#if HEAD_PAN_SERVO
+  sGamma.attach(PIN_SERVO_GAMMA, 500, 2500);
+#endif
+#if DEMO_RIG
+  sTable.setPeriodHertz(50); sLamp.setPeriodHertz(50);
+  sTable.attach(PIN_SERVO_TABLE, 500, 2500); sLamp.attach(PIN_SERVO_LAMP, 500, 2500);
+#endif
   park();
 
   WiFi.mode(WIFI_STA); WiFi.begin(WIFI_SSID, WIFI_PASS);
@@ -330,6 +419,7 @@ void setup() {
   server.on("/window", handleWindow);
   server.on("/park", handlePark);
   server.on("/calib", handleCalib);
+  server.on("/demo", handleDemo);
   server.on("/time", []() {           // impostazione manuale dell'ora (modalita' AP)
     if (server.hasArg("epoch")) { struct timeval tv = { (time_t)server.arg("epoch").toInt(), 0 }; settimeofday(&tv, nullptr); }
     server.send(200, "text/plain", String((long)time(nullptr)));

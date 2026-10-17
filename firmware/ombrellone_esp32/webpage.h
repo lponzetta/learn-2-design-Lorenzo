@@ -18,7 +18,7 @@ small{color:#666}
 <p>Tocca la pianta per spostare la zona d'ombra (cerchio). Il palo e' al centro, il Nord in alto.</p>
 <canvas id="c" width="500" height="500"></canvas>
 <div class="row"><label>Raggio zona <input id="r" type="range" min="0.03" max="0.3" step="0.01"></label><span id="rv"></span></div>
-<div class="row"><button onclick="send()">Applica</button><button onclick="fetch('/park')">Parcheggia</button><button onclick="fetch('/calib').then(r=>r.json()).then(j=>alert('Nord calibrato: offset '+j.north_offset))">Calibra Nord</button></div>
+<div class="row"><button onclick="send()">Applica</button><button onclick="fetch('/park')">Parcheggia</button><button onclick="fetch('/demo?on=1&speed=240&hour=6').then(refresh)">Demo giornata</button><button onclick="fetch('/demo?on=0').then(refresh)">Stop demo</button><button onclick="fetch('/calib').then(r=>r.json()).then(j=>alert('Nord calibrato: offset '+j.north_offset))">Calibra Nord</button></div>
 <p id="st"></p><p id="win"></p>
 <small>Giunti: <span id="joints"></span></small>
 </main>
@@ -41,7 +41,7 @@ c.addEventListener('pointerdown',pick);c.addEventListener('pointermove',e=>{if(e
 document.getElementById('r').oninput=e=>{tr=+e.target.value;document.getElementById('rv').textContent=(tr*100).toFixed(0)+' cm';draw();};
 function send(){fetch(`/set?x=${tx.toFixed(3)}&y=${ty.toFixed(3)}&r=${tr.toFixed(3)}`).then(r=>r.json()).then(j=>{document.getElementById('win').textContent='Copertura totale possibile oggi: '+j.window;refresh();});}
 function refresh(){fetch('/status').then(r=>r.json()).then(j=>{S=j;if(document.activeElement.id!=='r'){tr=j.target.r;document.getElementById('r').value=tr;document.getElementById('rv').textContent=(tr*100).toFixed(0)+' cm';}
-document.getElementById('clock').textContent=new Date(j.time*1000).toLocaleTimeString('it-IT');
+document.getElementById('clock').textContent=new Date(j.time*1000).toLocaleTimeString('it-IT')+(j.demo?' (demo x'+j.speed+')':'');
 document.getElementById('st').innerHTML=(j.parked?'Parcheggiato. ':'')+'Copertura zona: <b class="'+(j.coverage>=0.999?'ok':'ko')+'">'+(j.coverage*100).toFixed(0)+'%</b>, margine '+(j.margin*100).toFixed(0)+'%'+(j.full?'':' &mdash; <span class=ko>il sole e’ troppo basso per coprire tutta la zona</span>');
 document.getElementById('joints').textContent=`alpha ${j.held.alpha}°, theta ${j.held.theta}°, beta ${j.held.beta}°, gamma ${j.held.gamma}°`;draw();});}
 refresh();setInterval(refresh,5000);fetch('/window').then(r=>r.json()).then(j=>document.getElementById('win').textContent='Copertura totale possibile oggi: '+j.window);

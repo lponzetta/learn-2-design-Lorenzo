@@ -41,3 +41,17 @@ static const float ALPHA_SIGN = 1.0f, ALPHA_TRIM = 0.0f;
 static const float THETA_SERVO_ZERO = 10.0f, THETA_SIGN = 1.0f;   // servo a 10 gradi = braccio verticale
 static const float BETA_SERVO_ZERO  = 90.0f, BETA_SIGN  = 1.0f;   // servo a 90 gradi = tettuccio orizzontale
 static const float GAMMA_SIGN = 1.0f, GAMMA_TRIM = 0.0f;
+#define HEAD_ON_ARM 1        // 1: servo beta montato in punta al braccio (zero = tettuccio perpendicolare al braccio)
+#define HEAD_PAN_SERVO 0     // 1: quarto servo (gamma) presente; 0: gamma = alpha meccanicamente (3 servo)
+
+// --- banco demo "sole artificiale" (vedi docs/PROTOTIPO_1_10.md) -------------
+#define DEMO_RIG 1           // 1: piattaforma girevole + braccio lampada collegati all'ESP32
+#define PIN_SERVO_TABLE 26   // servo MG996R 270 gradi sotto la piattaforma
+#define PIN_SERVO_LAMP  25   // servo MG996R di elevazione del braccio lampada
+static const float TABLE_AZ_CENTER = 180.0f;   // azimut (del modello) verso la lampada con servo a 90 gradi
+static const float TABLE_SERVO_RANGE = 270.0f, TABLE_SIGN = 1.0f, TABLE_TRIM = 0.0f;
+static const float LAMP_ARM_L = 0.60f;         // lunghezza braccio lampada [m]
+static const float LAMP_PIVOT_OFF = 0.17f;     // distanza orizzontale perno-centro piattaforma [m]
+static const float LAMP_PIVOT_H = 0.06f;       // quota del perno sopra la piattaforma [m]
+static const float LAMP_SERVO_ZERO = 0.0f, LAMP_SIGN = 1.0f;  // servo a 0 gradi = braccio orizzontale
+static const float DEMO_SPEED_DEFAULT = 240.0f;               // 240x: una giornata di sole in ~3.5 minuti

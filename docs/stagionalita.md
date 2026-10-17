@@ -1,6 +1,6 @@
 # Stagionalità: quando l'ombrellone è utilizzabile (e vendibile)
 
-Generato il 2026-10-17 14:30 con `python -m ombrellone.stagionalita`. Zona da coprire: cerchio r = 1 m. "Copertura totale" = tutta la zona in ombra; "giornata utile" = almeno 4 h di copertura totale.
+Generato il 2026-10-17 14:42 con `python -m ombrellone.stagionalita`. Zona da coprire: cerchio r = 1 m. "Copertura totale" = tutta la zona in ombra; "giornata utile" = almeno 4 h di copertura totale.
 
 La fattibilità dipende solo dalla direzione del sole: è stata calcolata una volta su una griglia (elevazione ogni 2.0°, azimut ogni 15.0°) e applicata a tutto l'anno (un giorno ogni 3, passo 10 min).
 

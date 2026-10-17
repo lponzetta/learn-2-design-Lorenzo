@@ -10,17 +10,21 @@ Contenuto del repository:
 |---|---|
 | `ombrellone/` | pacchetto Python: posizione del sole (`solar.py`), cinematica e ombra (`geometry.py`), algoritmo di controllo e pianificazione giornaliera con limiti (`planner.py`), studio meccanico, materiali e FEM (`mechanics.py`), script di simulazione (`simulate.py`) |
 | `tests/` | test automatici (pytest), inclusa validazione del sole contro pvlib |
-| `firmware/ombrellone_esp32/` | firmware Arduino per ESP32 del mini-prototipo (4 servo, web app, NTP, stesso algoritmo) |
+| `firmware/ombrellone_esp32/` | firmware Arduino per ESP32 del mini-prototipo (3-4 servo, web app, NTP, stesso algoritmo, modalità demo con sole artificiale) |
 | `docs/PROGETTO.md` | documento di progetto: concetto, algoritmo, limiti, meccanica, materiali, elettronica, prototipo mini, lista della spesa, idee |
 | `docs/risultati.md` | risultati numerici e figure generate dalla simulazione |
-| `docs/simulatore.html` | simulatore interattivo nel browser (stesso algoritmo in JavaScript) |
+| `docs/simulatore.html` | simulatore interattivo nel browser (stesso algoritmo in JavaScript): geometria, giornata, stagionalità, mappamondo per scegliere la località |
+| `docs/stagionalita.md` | quando e dove è utilizzabile: calendario annuale, ore/giorno per mese, confronto fra latitudini |
+| `docs/PROTOTIPO_1_10.md` | guida di costruzione del prototipo 1:10 con banco demo per investitori, lista della spesa, copione della demo |
+| `hardware/scad/` | parti stampabili in 3D (OpenSCAD parametrico) del mini-prototipo e del banco demo |
 
 ## Avvio rapido
 
 ```bash
 pip install -r requirements.txt
 python -m pytest -q                 # test
-python -m ombrellone.simulate --fast  # figure e risultati in docs/ (circa 5 minuti)
+python -m ombrellone.simulate --fast  # figure e risultati in docs/ (circa 10 minuti)
+python -m ombrellone.stagionalita     # analisi annuale e per latitudine (circa 4 minuti)
 ```
 
 Esempio d'uso del pacchetto:
