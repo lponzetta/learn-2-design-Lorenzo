@@ -93,3 +93,21 @@ La fattibilità dipende solo dalla direzione del sole: è stata calcolata una vo
  }
 }
 ```
+## Posto e giorno migliori (in teoria)
+
+`python -m ombrellone.posto_migliore` usa le soglie di elevazione qui sopra e
+calcola le ore di copertura totale per ogni latitudine e giorno dell'anno.
+
+![posto e giorno](figure/13_posto_e_giorno.png)
+
+| | miglior giorno singolo | miglior latitudine sull'anno |
+|---|---|---|
+| A · base | 6.8 h/giorno al solstizio d'estate a 36° di latitudine (es. Gibilterra, Malta, Creta; 21 giugno a Nord, 21 dicembre a Sud) | equatore: ≈ 2060 h/anno (Rimini: 940) |
+| C · sbalzo mobile + palo a Sud | 8.2 h/giorno al solstizio d'estate a ≈ 57° (Scozia, Danimarca: sole basso ma giornate lunghissime) | ≈ 12° di latitudine (Caraibi, Thailandia, Senegal): ≈ 2450 h/anno (Rimini: 1850) |
+
+Lettura: per il **singolo giorno** vince il solstizio d'estate a latitudini
+medie (per la base attorno a 36°: a mezzogiorno il sole è alto e la giornata è
+lunga); per il **totale annuo** vince la fascia tropicale, dove il sole sta
+sopra la soglia quasi tutti i giorni. L'Italia (38–46°) è nella fascia buona
+d'estate, non d'inverno: è un prodotto stagionale al Nord e quasi annuale in
+Sicilia.
