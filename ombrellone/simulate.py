@@ -21,7 +21,7 @@ import matplotlib.pyplot as plt
 from matplotlib.patches import Circle, Ellipse
 
 from .geometry import Umbrella, Target, Pose, evaluate, forward_kinematics, canopy_rim, ellipse_axes
-from .planner import plan_day, solve_pose, min_elevation_for_full_coverage, DayPlan
+from .planner import plan_day, solve_pose, min_elevation_for_full_coverage, full_coverage_hours, DayPlan
 from .solar import sun_position, sun_path, sun_vector_enu
 from .mechanics import (MassModel, Tube, MATERIALS, worst_case_loads, required_base_mass,
                         size_motor, size_linear_actuator, arm_beam_check, material_sweep, frame_fem,
@@ -210,31 +210,27 @@ def fig_variants(fast: bool):
     grid = np.arange(89, 9, -3.0) if fast else np.arange(89, 9, -1.0)
     rows = []
     for name, u, t in variants:
-        res = {}
-        for az in (180, 120, 90):
-            res[az] = min_elevation_for_full_coverage(u, t, az, grid)
-        rows.append((name, res[180], res[120], res[90]))
-    # ore di copertura totale il 15 luglio (a Sud) in base all'elevazione minima
-    path = sun_path(datetime(2026, 7, 15), LAT, LON, 5, TZ)
-    def hours_above(e):
-        if e is None:
-            return 0.0, None, None
-        ts = [t for t, sp in path if sp.elevation_deg >= e]
-        return len(ts) * 5 / 60, (ts[0] if ts else None), (ts[-1] if ts else None)
+        res = {az: min_elevation_for_full_coverage(u, t, az, grid) for az in (180, 120, 90)}
+        day = full_coverage_hours(u, t, datetime(2026, 7, 15), LAT, LON, TZ, 15 if fast else 10)
+        rows.append((name, res[180], res[120], res[90], day))
+        print("  ", name.replace("\n", " "), res, day["ore"], flush=True)
     out = []
-    fig, ax = plt.subplots(figsize=(8.5, 4.6))
+    fig, ax = plt.subplots(figsize=(9, 4.8))
     names = [r[0] for r in rows]
-    vals = [r[1] if r[1] is not None else 90 for r in rows]
-    bars = ax.barh(range(len(rows)), vals, color=[C1 if i == 0 else C3 for i in range(len(rows))], height=0.6)
+    vals = [r[4]["ore"] for r in rows]
+    ax.barh(range(len(rows)), vals, color=[C1 if i == 0 else C3 for i in range(len(rows))], height=0.6)
     for i, r in enumerate(rows):
-        hrs, t0, t1 = hours_above(r[1])
-        ax.text(vals[i] + 0.8, i, f"{vals[i]:.0f}°  →  {hrs:.1f} h/giorno ({fmt(t0)}–{fmt(t1)})", va="center", fontsize=8, color=INK)
+        d = r[4]
+        gaps = ("; buchi " + ", ".join(f"{fmt(a)}–{fmt(b)}" for a, b in d["buchi"])) if d["buchi"] else ""
+        ax.text(vals[i] + 0.1, i, f"{vals[i]:.1f} h  ({fmt(d['da'])}–{fmt(d['a'])}{gaps})   sole min a S {r[1]}°, E {r[3]}°",
+                va="center", fontsize=8, color=INK)
         out.append({"variante": r[0].replace("\n", " "), "min_elev_S": r[1], "min_elev_SE": r[2], "min_elev_E": r[3],
-                    "ore_copertura_totale_15lug": hrs, "da": fmt(t0), "a": fmt(t1)})
+                    "ore_copertura_totale_15lug": d["ore"], "da": fmt(d["da"]), "a": fmt(d["a"]),
+                    "buchi": [f"{fmt(a)}–{fmt(b)}" for a, b in d["buchi"]]})
     ax.set_yticks(range(len(rows))); ax.set_yticklabels(names, fontsize=8)
-    ax.invert_yaxis(); ax.set_xlim(0, 75)
-    ax.set_xlabel("elevazione minima del sole per copertura TOTALE della zona (r = 1 m) [°]")
-    ax.set_title("Quanto si guadagna con le varianti di progetto (15 luglio, Rimini)", fontsize=10)
+    ax.invert_yaxis(); ax.set_xlim(0, 15)
+    ax.set_xlabel("ore al giorno di copertura TOTALE della zona (r = 1 m), 15 luglio, Rimini")
+    ax.set_title("Quanto si guadagna con le varianti di progetto", fontsize=10)
     fig.savefig(FIG / "06_varianti.png")
     plt.close(fig)
     return out
@@ -257,7 +253,7 @@ def fig_mechanics(u: Umbrella):
     ax[0].plot(vs * 3.6, rows["head_w"], color=C3, lw=2, label="cerniera tettuccio (lavoro)")
     ax[0].plot(vs * 3.6, rows["tilt_p"], color=C1, lw=1.5, ls="--", label="inclinazione (parcheggio)")
     ax[0].axvline(WIND_WORK * 3.6, color=INK2, ls=":", lw=1)
-    ax[0].text(WIND_WORK * 3.6 + 0.5, max(rows["tilt_w"]) * 0.9, "limite esercizio\n→ parcheggio", fontsize=8, color=INK2)
+    ax[0].text(WIND_WORK * 3.6 + 0.8, max(rows["tilt_w"]) * 0.45, "limite esercizio\n→ parcheggio", fontsize=8, color=INK2)
     ax[0].set(xlabel="vento [km/h]", ylabel="coppia al giunto [N·m]", title="Coppie ai giunti (caso peggiore di direzione)")
     ax[0].legend(frameon=False, fontsize=8)
     ax[1].plot(vs * 3.6, rows["base_w"], color=C1, lw=2, label="posa di lavoro (θ=70°)")
@@ -279,9 +275,9 @@ def fig_mechanics(u: Umbrella):
         "zavorra_kg": {f"base_r{r}_lavoro_8ms": required_base_mass(u, work, mm, WIND_WORK, r) for r in (0.4, 0.5, 0.6)},
         "zavorra_parcheggio_15ms_r0.5": required_base_mass(u, park, mm, WIND_PARK, 0.5),
         "motori": {
-            "azimut_stepper_vite_senza_fine": size_motor("azimut", lw.azimuth_torque_Nm, 180, 60, 60, 0.45).__dict__,
-            "inclinazione_attuatore_lineare": size_linear_actuator("inclinazione", lw.tilt_torque_Nm, 0.15, 70, 40),
-            "tettuccio_attuatore_lineare": size_linear_actuator("tettuccio", lw.head_torque_Nm, 0.08, 70, 30),
+            "azimut_stepper_vite_senza_fine": size_motor("azimut", lw.azimuth_torque_Nm, 180, 60, 400, 0.4).__dict__,
+            "inclinazione_attuatore_lineare": size_linear_actuator("inclinazione", lw.tilt_torque_Nm, 0.25, 70, 40),
+            "tettuccio_attuatore_lineare": size_linear_actuator("tettuccio", lw.head_torque_Nm, 0.12, 70, 30),
         },
     }
     return res
@@ -367,9 +363,9 @@ def write_markdown(res: dict, path: Path):
     L.append("\n## Limiti geometrici\n")
     L.append("![limiti](figure/05_limiti_L_theta.png)\n")
     L.append("### Varianti di progetto\n")
-    L.append("| variante | elev. min. sole a Sud | a Sud-Est | a Est | ore copertura totale 15 lug (sole a Sud) | finestra |\n|---|---|---|---|---|---|")
+    L.append("| variante | ore copertura totale 15 lug | finestra | buchi | elev. min. sole a Sud | a Sud-Est | a Est |\n|---|---|---|---|---|---|---|")
     for r in res["varianti"]:
-        L.append(f"| {r['variante']} | {r['min_elev_S']}° | {r['min_elev_SE']}° | {r['min_elev_E']}° | {r['ore_copertura_totale_15lug']:.1f} h | {r['da']}–{r['a']} |")
+        L.append(f"| {r['variante']} | {r['ore_copertura_totale_15lug']:.1f} h | {r['da']}–{r['a']} | {', '.join(r['buchi']) or '-'} | {r['min_elev_S']}° | {r['min_elev_SE']}° | {r['min_elev_E']}° |")
     L.append("\n![varianti](figure/06_varianti.png)\n")
     L.append("\n## Meccanica\n")
     m = res["meccanica"]

@@ -116,7 +116,8 @@ def wind_force_on_disk(R: float, n: np.ndarray, wind_dir_az_deg: float, v: float
     Modello a lastra piana: forza normale al disco, coefficiente
     C_N = max(1.17*|sin a|, 0.35) dove a e' l'angolo d'attacco fra vento e disco.
     Il minimo 0.35 rappresenta la portanza del tettuccio bombato con vento radente
-    (e' il caso che "strappa" gli ombrelloni veri).
+    (e' il caso che "strappa" gli ombrelloni veri).  Si aggiunge una resistenza
+    tangenziale (bordo, stecche, tela che sventola) C_T = 0.1 lungo il vento.
     """
     w = horiz_unit(wind_dir_az_deg)      # direzione da cui soffia -> verso cui spinge
     n = n / np.linalg.norm(n)
@@ -125,7 +126,7 @@ def wind_force_on_disk(R: float, n: np.ndarray, wind_dir_az_deg: float, v: float
     q = 0.5 * RHO_AIR * v**2
     A = math.pi * R**2
     sign = 1.0 if float(w @ n) >= 0 else -1.0
-    return sign * q * cn * A * n
+    return sign * q * cn * A * n + 0.1 * q * A * w
 
 
 def wind_force_on_tube(L: float, D: float, v: float) -> float:
@@ -171,14 +172,16 @@ def joint_loads(u: Umbrella, p: Pose, mm: MassModel, v_wind: float, wind_dir_deg
     # asse di inclinazione: orizzontale, perpendicolare al piano verticale del braccio
     tilt_axis = np.cross(np.array([0, 0, 1.0]), horiz_unit(p.alpha_deg))
     tilt_torque = abs(float(M_joint @ tilt_axis))
-    az_torque = abs(float(M_joint[2]))
+    # imbardata: momento attorno all'asse verticale + eccentricita' del centro di
+    # pressione (vento laterale su disco inclinato), stimata come |F| * e_cp
+    w = horiz_unit(wind_dir_deg)
+    sin_a = abs(float(w @ (n / np.linalg.norm(n))))
+    e_cp = 0.5 * u.R * (1.0 - sin_a)
+    az_torque = abs(float(M_joint[2])) + float(np.linalg.norm(Fw_c)) * e_cp * abs(float(np.cross(w, n)[2]))
     # giunto testa: peso + vento attorno a E.  Il centro di pressione di una
     # lastra inclinata non e' al centro: si sposta verso il bordo sopravvento di
     # e_cp = 0.5*R*(1 - sin a) (a = angolo d'attacco), quindi anche con sbalzo
     # nullo il vento genera una coppia sulla cerniera del tettuccio.
-    w = horiz_unit(wind_dir_deg)
-    sin_a = abs(float(w @ (n / np.linalg.norm(n))))
-    e_cp = 0.5 * u.R * (1.0 - sin_a)
     M_head = moment(E, [(Fw_c + Fg_c, C)])
     head_torque = float(np.linalg.norm(M_head)) + float(np.linalg.norm(Fw_c)) * e_cp
     # ribaltamento: momento orizzontale rispetto alla base (origine)

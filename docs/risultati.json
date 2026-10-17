@@ -1,0 +1,417 @@
+{
+  "generato": "2026-10-17 13:58",
+  "progetto_base": {
+    "H": 2.0,
+    "L": 1.6,
+    "R": 1.5,
+    "theta_max_deg": 70.0,
+    "beta_max_deg": 70.0,
+    "h_min": 1.6,
+    "canopy_offset": 0.0,
+    "L_min": null,
+    "L_max": null,
+    "pole_radius": 0.04,
+    "alpha_min_deg": -1000000000.0,
+    "alpha_max_deg": 1000000000.0,
+    "zona": {
+      "x": 0,
+      "y": 0,
+      "r": 1.0
+    }
+  },
+  "giornata_15_luglio": {
+    "ore_di_sole_(elev>5°)": 14.0,
+    "finestra_copertura_totale": "10:00–16:30",
+    "ore_copertura_totale": 6.7,
+    "buchi_(copertura_parziale)": "06:20–10:00, 16:40–20:10",
+    "copertura_media_tenuta_%": 60.9,
+    "copertura_minima_tenuta_%": 0.0,
+    "movimenti_al_giorno": 31,
+    "corsa_totale_giunti_gradi": 645
+  },
+  "giornata_21_settembre": {
+    "ore_di_sole_(elev>5°)": 11.2,
+    "finestra_copertura_totale": "12:00–14:10",
+    "ore_copertura_totale": 2.3,
+    "buchi_(copertura_parziale)": "07:30–12:00, 14:20–18:30",
+    "copertura_media_tenuta_%": 48.3,
+    "copertura_minima_tenuta_%": 0.0,
+    "movimenti_al_giorno": 41,
+    "corsa_totale_giunti_gradi": 447
+  },
+  "limiti_L_theta": {
+    "L": [
+      1.2,
+      1.6,
+      2.0,
+      2.4
+    ],
+    "theta_max": [
+      50,
+      60,
+      70,
+      80
+    ],
+    "min_elev": [
+      [
+        59.0,
+        56.0,
+        50.0,
+        47.0
+      ],
+      [
+        59.0,
+        53.0,
+        44.0,
+        41.0
+      ],
+      [
+        56.0,
+        50.0,
+        41.0,
+        38.0
+      ],
+      [
+        53.0,
+        47.0,
+        38.0,
+        35.0
+      ]
+    ]
+  },
+  "varianti": [
+    {
+      "variante": "Base: H2.0 L1.6 R1.5 θmax 70°, zona centrata",
+      "min_elev_S": 44.0,
+      "min_elev_SE": 44.0,
+      "min_elev_E": 44.0,
+      "ore_copertura_totale_15lug": 6.5,
+      "da": "10:05",
+      "a": "16:30"
+    },
+    {
+      "variante": "+ sbalzo tettuccio 0.6 m",
+      "min_elev_S": 38.0,
+      "min_elev_SE": 38.0,
+      "min_elev_E": 38.0,
+      "ore_copertura_totale_15lug": 7.666666666666667,
+      "da": "09:30",
+      "a": "17:05"
+    },
+    {
+      "variante": "+ braccio telescopico 1.2–2.4 m",
+      "min_elev_S": 38.0,
+      "min_elev_SE": 38.0,
+      "min_elev_E": 38.0,
+      "ore_copertura_totale_15lug": 7.666666666666667,
+      "da": "09:30",
+      "a": "17:05"
+    },
+    {
+      "variante": "+ tettuccio R 1.8 m",
+      "min_elev_S": 41.0,
+      "min_elev_SE": 41.0,
+      "min_elev_E": 41.0,
+      "ore_copertura_totale_15lug": 7.083333333333333,
+      "da": "09:45",
+      "a": "16:45"
+    },
+    {
+      "variante": "+ palo più basso H 1.6",
+      "min_elev_S": 41.0,
+      "min_elev_SE": 41.0,
+      "min_elev_E": 41.0,
+      "ore_copertura_totale_15lug": 7.083333333333333,
+      "da": "09:45",
+      "a": "16:45"
+    },
+    {
+      "variante": "palo a SUD della zona (zona 1.2 m a Nord del palo)",
+      "min_elev_S": 32.0,
+      "min_elev_SE": 41.0,
+      "min_elev_E": 56.0,
+      "ore_copertura_totale_15lug": 8.75,
+      "da": "08:55",
+      "a": "17:35"
+    },
+    {
+      "variante": "palo a Sud della zona + sbalzo 0.6",
+      "min_elev_S": 74.0,
+      "min_elev_SE": 32.0,
+      "min_elev_E": 41.0,
+      "ore_copertura_totale_15lug": 0.0,
+      "da": "-",
+      "a": "-"
+    },
+    {
+      "variante": "palo a Sud della zona + sbalzo 0.6 + telescopico 1.2–2.4",
+      "min_elev_S": 71.0,
+      "min_elev_SE": 29.0,
+      "min_elev_E": 35.0,
+      "ore_copertura_totale_15lug": 0.0,
+      "da": "-",
+      "a": "-"
+    },
+    {
+      "variante": "palo a NORD della zona (zona 1.2 m a Sud del palo)",
+      "min_elev_S": 71.0,
+      "min_elev_SE": 65.0,
+      "min_elev_E": 56.0,
+      "ore_copertura_totale_15lug": 0.0,
+      "da": "-",
+      "a": "-"
+    }
+  ],
+  "meccanica": {
+    "masse_kg": {
+      "tettuccio": 4.70057504117311,
+      "braccio": 2.3207573250598528,
+      "palo": 5.157238500133001,
+      "snodo": 3.0,
+      "elettronica": 1.0
+    },
+    "carichi_lavoro_8ms": {
+      "coppia_inclinazione_Nm": 253.33625150193362,
+      "coppia_azimut_Nm": 3.394801219719869,
+      "coppia_tettuccio_Nm": 72.73572391223769,
+      "momento_base_Nm": 192.90300084845552,
+      "forza_vento_tettuccio_N": 204.0215879330234
+    },
+    "carichi_parcheggio_15ms": {
+      "coppia_inclinazione_Nm": 12.700799999999997,
+      "momento_base_Nm": 70.9128
+    },
+    "zavorra_kg": {
+      "base_r0.4_lavoro_8ms": 79.59108814160008,
+      "base_r0.5_lavoro_8ms": 60.43715634000687,
+      "base_r0.6_lavoro_8ms": 47.667868472278066
+    },
+    "zavorra_parcheggio_15ms_r0.5": 5.507300693267061,
+    "motori": {
+      "azimut_stepper_vite_senza_fine": {
+        "joint": "azimut",
+        "holding_torque_Nm": 3.394801219719869,
+        "design_torque_Nm": 6.789602439439738,
+        "output_speed_rpm": 0.5,
+        "gear_ratio": 60,
+        "motor_torque_Nm": 0.2514667570162866,
+        "power_W": 0.7900061164644155,
+        "suggestion": "NEMA17 stepper (0.4-0.5 Nm) o DC 12V 30-50 W con riduttore"
+      },
+      "inclinazione_attuatore_lineare": {
+        "giunto": "inclinazione",
+        "forza_N": 3377.8166866924485,
+        "corsa_mm": 172.0729309053138,
+        "velocita_mm_s": 4.301823272632845,
+        "braccio_leva_m": 0.15,
+        "suggerimento": "attuatore 12/24 V classe 3000-6000 N"
+      },
+      "tettuccio_attuatore_lineare": {
+        "giunto": "tettuccio",
+        "forza_N": 1818.3930978059423,
+        "corsa_mm": 91.77222981616737,
+        "velocita_mm_s": 3.059074327205579,
+        "braccio_leva_m": 0.08,
+        "suggerimento": "attuatore 12/24 V classe 3000-6000 N"
+      }
+    }
+  },
+  "materiali": [
+    {
+      "materiale": "Al 6061-T6",
+      "D_mm": 40.0,
+      "t_mm": 3.0,
+      "massa_kg": 1.5064565092493776,
+      "freccia_mm": 50.60580630218919,
+      "tensione_MPa": 82.76385930129102,
+      "coeff_sicurezza": 2.899816441936466
+    },
+    {
+      "materiale": "Al 6061-T6",
+      "D_mm": 50.0,
+      "t_mm": 3.0,
+      "massa_kg": 1.913606917154615,
+      "freccia_mm": 24.977723333041716,
+      "tensione_MPa": 51.2102635817511,
+      "coeff_sicurezza": 4.686560529353037
+    },
+    {
+      "materiale": "Al 6061-T6",
+      "D_mm": 60.0,
+      "t_mm": 3.0,
+      "massa_kg": 2.3207573250598528,
+      "freccia_mm": 14.148535066336668,
+      "tensione_MPa": 34.90796815461163,
+      "coeff_sicurezza": 6.875221122495897
+    },
+    {
+      "materiale": "Al 6061-T6",
+      "D_mm": 70.0,
+      "t_mm": 3.0,
+      "massa_kg": 2.7279077329650923,
+      "freccia_mm": 8.796970990363757,
+      "tensione_MPa": 25.391915878589025,
+      "coeff_sicurezza": 9.451827154262624
+    },
+    {
+      "materiale": "Al 6061-T6",
+      "D_mm": 80.0,
+      "t_mm": 3.0,
+      "massa_kg": 3.135058140870331,
+      "freccia_mm": 5.849947435042657,
+      "tensione_MPa": 19.35014215504564,
+      "coeff_sicurezza": 12.403009656309884
+    },
+    {
+      "materiale": "Acciaio S235",
+      "D_mm": 40.0,
+      "t_mm": 2.0,
+      "massa_kg": 2.9988386834106713,
+      "freccia_mm": 23.88722327844485,
+      "tensione_MPa": 120.1286654316171,
+      "coeff_sicurezza": 1.9562358339340171
+    },
+    {
+      "materiale": "Acciaio S235",
+      "D_mm": 50.0,
+      "t_mm": 2.0,
+      "massa_kg": 3.788006757992436,
+      "freccia_mm": 12.068112315241157,
+      "tensione_MPa": 76.25381161094884,
+      "coeff_sicurezza": 3.0818131583898123
+    },
+    {
+      "materiale": "Acciaio S235",
+      "D_mm": 60.0,
+      "t_mm": 2.0,
+      "massa_kg": 4.5771748325741894,
+      "freccia_mm": 6.959706649757382,
+      "tensione_MPa": 53.032321991736254,
+      "coeff_sicurezza": 4.43125986519351
+    },
+    {
+      "materiale": "Acciaio S235",
+      "D_mm": 70.0,
+      "t_mm": 2.0,
+      "massa_kg": 5.366342907155943,
+      "freccia_mm": 4.391809817634141,
+      "tensione_MPa": 39.22889639676773,
+      "coeff_sicurezza": 5.990482057490735
+    },
+    {
+      "materiale": "Acciaio S235",
+      "D_mm": 80.0,
+      "t_mm": 2.0,
+      "massa_kg": 6.155510981737702,
+      "freccia_mm": 2.9581170564777794,
+      "tensione_MPa": 30.33613072162001,
+      "coeff_sicurezza": 7.746538349154719
+    },
+    {
+      "materiale": "CFRP",
+      "D_mm": 40.0,
+      "t_mm": 2.0,
+      "massa_kg": 0.6112282666824298,
+      "freccia_mm": 43.232306760971916,
+      "tensione_MPa": 111.9798171576637,
+      "coeff_sicurezza": 4.465090341199765
+    },
+    {
+      "materiale": "CFRP",
+      "D_mm": 50.0,
+      "t_mm": 2.0,
+      "massa_kg": 0.7720778105462289,
+      "freccia_mm": 21.551865618911215,
+      "tensione_MPa": 69.86325035624536,
+      "coeff_sicurezza": 7.156838501650146
+    },
+    {
+      "materiale": "CFRP",
+      "D_mm": 60.0,
+      "t_mm": 2.0,
+      "massa_kg": 0.9329273544100259,
+      "freccia_mm": 12.267534780874803,
+      "tensione_MPa": 47.777185872072735,
+      "coeff_sicurezza": 10.465245930113806
+    },
+    {
+      "materiale": "CFRP",
+      "D_mm": 70.0,
+      "t_mm": 2.0,
+      "massa_kg": 1.0937768982738227,
+      "freccia_mm": 7.642663416241779,
+      "tensione_MPa": 34.76710263570509,
+      "coeff_sicurezza": 14.381411221955274
+    },
+    {
+      "materiale": "CFRP",
+      "D_mm": 80.0,
+      "t_mm": 2.0,
+      "massa_kg": 1.2546264421376208,
+      "freccia_mm": 5.083485337390706,
+      "tensione_MPa": 26.45980604991025,
+      "coeff_sicurezza": 18.89658597862988
+    },
+    {
+      "materiale": "GFRP",
+      "D_mm": 40.0,
+      "t_mm": 3.0,
+      "massa_kg": 1.0600990250273397,
+      "freccia_mm": 98.76364069088012,
+      "tensione_MPa": 81.66782146784573,
+      "coeff_sicurezza": 3.673417444080054
+    },
+    {
+      "materiale": "GFRP",
+      "D_mm": 50.0,
+      "t_mm": 3.0,
+      "massa_kg": 1.3466122750347291,
+      "freccia_mm": 48.61921744211989,
+      "tensione_MPa": 50.35908000731038,
+      "coeff_sicurezza": 5.957217644890464
+    },
+    {
+      "materiale": "GFRP",
+      "D_mm": 60.0,
+      "t_mm": 3.0,
+      "massa_kg": 1.6331255250421184,
+      "freccia_mm": 27.468982685951172,
+      "tensione_MPa": 34.212599768567614,
+      "coeff_sicurezza": 8.768699310469271
+    },
+    {
+      "materiale": "GFRP",
+      "D_mm": 70.0,
+      "t_mm": 3.0,
+      "massa_kg": 1.9196387750495092,
+      "freccia_mm": 17.035600750858617,
+      "tensione_MPa": 24.804300219328614,
+      "coeff_sicurezza": 12.094677025648426
+    },
+    {
+      "materiale": "GFRP",
+      "D_mm": 80.0,
+      "t_mm": 3.0,
+      "massa_kg": 2.2061520250568996,
+      "freccia_mm": 11.300203429134116,
+      "tensione_MPa": 18.841438842655062,
+      "coeff_sicurezza": 15.92235086212371
+    }
+  ],
+  "fem": {
+    "freccia_punta_mm": 24.041733745098433,
+    "sigma_max_MPa": 35.276448270084714,
+    "sigma_amm_Al_MPa": 240.0
+  },
+  "scala_mini": {
+    "scala_lunghezze": 0.1,
+    "H_m": 0.2,
+    "L_m": 0.16000000000000003,
+    "R_m": 0.15000000000000002,
+    "fattore_aree_e_forze_vento": 0.010000000000000002,
+    "fattore_masse": 0.0010000000000000002,
+    "fattore_momenti_gravita": 0.00010000000000000002,
+    "fattore_momenti_vento": 0.0010000000000000002,
+    "nota": "a parita' di vento il mini e' relativamente PIU' robusto: valida software e cinematica, non la struttura"
+  }
+}

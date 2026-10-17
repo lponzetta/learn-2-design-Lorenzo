@@ -11,14 +11,14 @@ from ombrellone.mechanics import (MassModel, Tube, MATERIALS, joint_loads, worst
 def test_wind_force_magnitude():
     F = wind_force_on_disk(1.5, np.array([0, 1.0, 0]), 0.0, 10.0)  # vento da Nord su disco verticale
     q = 0.5 * 1.225 * 100
-    assert abs(np.linalg.norm(F) - q * 1.17 * math.pi * 2.25) < 1e-6
+    assert abs(np.linalg.norm(F) - q * (1.17 + 0.1) * math.pi * 2.25) < 1e-6
 
 
 def test_parked_pose_has_small_torques():
     u, mm = Umbrella(), MassModel()
     park = worst_case_loads(u, Pose(0, 0, 0, 0), mm, 8.0)
     work = worst_case_loads(u, Pose(180, 70, 39, 180), mm, 8.0)
-    assert park.tilt_torque_Nm < 0.2 * work.tilt_torque_Nm
+    assert park.tilt_torque_Nm < 0.3 * work.tilt_torque_Nm
     assert required_base_mass(u, Pose(0, 0, 0, 0), mm, 8.0, 0.5) < required_base_mass(u, Pose(180, 70, 39, 180), mm, 8.0, 0.5)
 
 

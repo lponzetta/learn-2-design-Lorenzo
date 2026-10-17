@@ -331,17 +331,45 @@ def plan_day(u: Umbrella, t: Target, date: datetime, lat: float, lon: float,
 # ----------------------------------------------------------------------------
 def min_elevation_for_full_coverage(u: Umbrella, t: Target, az_deg: float = 180.0,
                                     elev_grid: np.ndarray | None = None) -> float | None:
-    """Elevazione solare minima (gradi) a cui la copertura totale e' ancora possibile.
+    """Elevazione solare minima (gradi) a cui la copertura totale e' possibile.
 
-    Scansione dall'alto verso il basso; ``None`` se impossibile anche allo zenit.
+    Scansiona tutta la griglia (possono esserci "buchi" anche con sole alto,
+    ad esempio con sbalzo fisso e zona vicina al palo); ``None`` se mai.
     """
+    oks = feasible_elevations(u, t, az_deg, elev_grid)
+    return min(oks) if oks else None
+
+
+def feasible_elevations(u: Umbrella, t: Target, az_deg: float = 180.0,
+                        elev_grid: np.ndarray | None = None) -> list[float]:
+    """Elevazioni della griglia (gradi) in cui la copertura totale e' possibile."""
     from .solar import sun_vector_enu
     grid = elev_grid if elev_grid is not None else np.arange(89.0, 4.0, -1.0)
-    last_ok = None
+    oks = []
     for e in grid:
         sol = solve_pose(u, sun_vector_enu(float(e), az_deg), t, n_starts=4)
         if sol.full_coverage:
-            last_ok = float(e)
-        elif last_ok is not None:
-            break
-    return last_ok
+            oks.append(float(e))
+    return oks
+
+
+def full_coverage_hours(u: Umbrella, t: Target, date: datetime, lat: float, lon: float,
+                        tz: timezone | None = None, step_minutes: int = 15,
+                        min_elev_deg: float = 5.0) -> dict:
+    """Ore di copertura totale in un giorno reale (senza isteresi): finestra e buchi."""
+    from .solar import sun_path
+    path = sun_path(date, lat, lon, step_minutes, tz)
+    ok_times = []
+    for tt, sp in path:
+        if sp.elevation_deg < min_elev_deg:
+            continue
+        sol = solve_pose(u, sp.vector_enu, t, n_starts=4)
+        if sol.full_coverage:
+            ok_times.append(tt)
+    gaps = []
+    for a, b in zip(ok_times, ok_times[1:]):
+        if (b - a).total_seconds() / 60.0 > step_minutes * 1.5:
+            gaps.append((a + timedelta(minutes=step_minutes), b))
+    return {"ore": len(ok_times) * step_minutes / 60.0,
+            "da": ok_times[0] if ok_times else None, "a": ok_times[-1] if ok_times else None,
+            "buchi": gaps}

@@ -127,9 +127,9 @@ h_min = 1.6 m, zona r = 1 m centrata sul palo.
 | grandezza | 15 luglio | 21 settembre |
 |---|---|---|
 | elevazione minima del sole per copertura totale | 44° | 44° |
-| finestra di copertura totale | **10:00 – 16:30** (6.7 h) | vedi `risultati.md` (molto più corta: a settembre il sole a mezzogiorno è a 46°) |
-| copertura media della zona nelle ore di sole | ≈ 60 % | – |
-| movimenti al giorno (con isteresi) | ≈ 30 | – |
+| finestra di copertura totale | **10:00 – 16:30** (6.7 h) | **12:00 – 14:10** (2.3 h: a settembre il sole a mezzogiorno arriva a 46°) |
+| copertura media della zona nelle ore di sole | 61 % | 48 % |
+| movimenti al giorno (con isteresi) | 31 | 41 |
 
 Figure: `figure/02_giornata_15lug.png` (giornata), `03_istantanee_15lug.png`
 (pianta ora per ora), `04_vista_laterale.png` (sezione), `05_limiti_L_theta.png`
@@ -187,43 +187,47 @@ solo con un meccanismo diverso (sezione 10: carrello a terra o rotaia).
 
 ### 6.2 Vento: il vero dimensionante
 Forza su un disco: `F = ½ ρ v² C_N A`, C_N ≈ 1.17 perpendicolare, minimo
-0.35 radente (portanza della tela bombata). Con R = 1.5 m e 8 m/s (29 km/h,
-Beaufort 5) la forza sul tettuccio arriva a **≈ 200 N**; a 12 m/s (43 km/h) a
-460 N. Posa di massimo sbraccio (θ = 70°, tettuccio inclinato 39°), direzione
-del vento peggiore (`figure/07_coppie_vento.png`):
+0.35 radente (portanza della tela bombata), più una resistenza tangenziale
+C_T ≈ 0.1 (bordo, stecche, tela che sventola). Con R = 1.5 m e 8 m/s (29 km/h,
+Beaufort 5) la forza sul tettuccio arriva a **≈ 220 N**; a 12 m/s (43 km/h) a
+500 N. Posa di massimo sbraccio (θ = 70°, tettuccio inclinato 39°), direzione
+del vento peggiore per ogni grandezza (`figure/07_coppie_vento.png`):
 
-| vento | coppia giunto inclinazione | momento alla base | zavorra base Ø1 m (coeff. 1.5) |
-|---|---|---|---|
-| 5 m/s (18 km/h) | 21 N·m | 128 N·m | 41 kg |
-| **8 m/s (29 km/h)** | **80 N·m** | **193 N·m** | **60 kg** |
-| 12 m/s (43 km/h) | 289 N·m | 326 N·m | 101 kg |
-| 15 m/s parcheggio (braccio verticale, tettuccio orizzontale) | ≈ 10 N·m | ≈ 70 N·m | ≈ 15 kg |
+| vento | coppia giunto inclinazione | coppia azimut | momento alla base | zavorra base Ø1 m (coeff. 1.5) |
+|---|---|---|---|---|
+| 5 m/s (18 km/h) | 146 N·m | 36 N·m | 156 N·m | 49 kg |
+| **8 m/s (29 km/h)** | **238 N·m** | **93 N·m** | **263 N·m** | **82 kg** |
+| 12 m/s (43 km/h) | 428 N·m | 208 N·m | 485 N·m | 150 kg |
+| 8 m/s in parcheggio (braccio verticale, tettuccio orizzontale) | 48 N·m | – | 120 N·m | 20 kg |
+| 15 m/s (54 km/h) in parcheggio | 169 N·m | – | 422 N·m | 113 kg |
 
 Conseguenze di progetto:
 * **Limite operativo 8 m/s** e **parcheggio automatico** sopra (anemometro a
   coppette da 10 €, o stima dalla corrente degli attuatori). In parcheggio le
   coppie crollano di un ordine di grandezza: è la stessa regola degli ombrelloni
   da bar, solo automatica.
-* **Zavorra 60–80 kg** con base Ø1 m (base a croce con piastre da 20 kg, oppure
-  interrata/fissata a una pedana). È la cifra degli ombrelloni a braccio in
-  commercio, non è un'anomalia del progetto.
+* **Zavorra 80–100 kg** con base Ø1 m per lavorare fino a 8 m/s (base a croce
+  con 4 piastre da 20–25 kg, oppure fissata a una pedana/interrata). È la cifra
+  degli ombrelloni a braccio in commercio, non è un'anomalia del progetto.
+  Per restare **aperto** a 15 m/s servirebbero 110+ kg: sopra 12 m/s conviene
+  **chiudere** il tettuccio (manovella motorizzata), esattamente come si fa a mano.
 * Gli attuatori devono essere **autobloccanti** (vite senza fine o vite a
   ricircolo): a motore spento il vento non deve muoverli.
 
 ### 6.3 Attuatori (dimensionamento in `risultati.md`, sezione "Attuatori")
 | giunto | coppia di progetto (×2) | soluzione consigliata |
 |---|---|---|
-| inclinazione braccio θ | 160 N·m | **attuatore lineare 12/24 V** su leva da 15 cm → ≈ 1100 N, corsa ≈ 17 cm, 4 mm/s. Classe "1500 N", autobloccante, 40–60 € |
-| rotazione azimut α | fino a ≈ 100 N·m (vento laterale) | ralla con **vite senza fine** 1:60 + stepper NEMA23 o motoriduttore DC 24 V; 0.5 giri/min bastano (il sole fa 15°/h) |
-| inclinazione tettuccio β | ≈ 60 N·m | attuatore lineare piccolo (500 N, corsa 8 cm) o motoriduttore con vite senza fine |
+| inclinazione braccio θ | 480 N·m | **attuatore lineare 12/24 V** su leva da 25 cm → ≈ 1900 N, corsa ≈ 29 cm, 7 mm/s. Classe "3000 N", autobloccante, 60–90 € |
+| rotazione azimut α | ≈ 185 N·m (vento laterale, centro di pressione eccentrico) | **ralla a vite senza fine** ("slew drive" da 3", autobloccante, 100–150 €) con motoriduttore DC 24 V, oppure vite senza fine 1:100 + cinghia 1:4 su stepper NEMA23; 0.5 giri/min bastano (il sole fa 15°/h) |
+| inclinazione tettuccio β | ≈ 150 N·m | attuatore lineare classe 1500 N su leva da 12 cm, corsa 14 cm (30–40 €) |
 | direzione tettuccio γ | piccola | motoriduttore + vite senza fine; **opzionale**: con zona centrata γ ≈ α e si può bloccare meccanicamente γ = α (3 motori invece di 4) |
 
 Velocità: tutto molto lento (giri/min frazionari). La potenza di picco è
-≈ 30–40 W per attuatore, per pochi secondi.
+≈ 40–60 W per attuatore (3–5 A a 12 V), per qualche decina di secondi.
 
 ### 6.4 Energia
-≈ 30 movimenti/giorno × 20 s × 35 W ≈ 6 Wh + elettronica 24 h × 1 W ≈ 24 Wh →
-**≈ 30 Wh/giorno**. Batteria LiFePO4 12 V 7 Ah (90 Wh) = 3 giorni; un
+≈ 30 movimenti/giorno × 30 s × 50 W ≈ 12 Wh + elettronica 24 h × 1 W ≈ 24 Wh →
+**≈ 40 Wh/giorno**. Batteria LiFePO4 12 V 7 Ah (90 Wh) = 3 giorni; un
 **pannello solare da 20–30 W** cucito sul tettuccio (sempre orientato al sole!)
 la ricarica in 2 ore. Dettaglio elegante: il tettuccio che insegue il sole è un
 inseguitore solare gratis.
@@ -232,12 +236,13 @@ inseguitore solare gratis.
 Verifica a mensola e **FEM a telaio piano** (travi di Eulero-Bernoulli, palo
 incastrato + braccio, `mechanics.frame_fem`), vento 8 m/s, θ = 70°:
 
-| braccio | massa | freccia in punta | tensione | coeff. sicurezza |
+| braccio | massa | freccia in punta (mensola) | tensione | coeff. sicurezza |
 |---|---|---|---|---|
-| Al 6061-T6 Ø60×3 | 2.3 kg | ≈ 6 mm | 16 MPa | ≈ 15 |
-| Al 6061-T6 Ø40×3 | 1.5 kg | ≈ 25 mm | 40 MPa | ≈ 6 |
-| acciaio S235 Ø50×2 | 3.8 kg | ≈ 6 mm | – | > 10 |
-| carbonio Ø50×2 | 0.8 kg | ≈ 5 mm | – | > 20 |
+| **Al 6061-T6 Ø60×3** | 2.3 kg | 13 mm (19 mm col FEM, che include la flessione del palo Ø80×4) | 33 MPa | 7 |
+| Al 6061-T6 Ø70×3 | 2.7 kg | 8 mm | 24 MPa | 10 |
+| Al 6061-T6 Ø40×3 | 1.5 kg | 47 mm | 78 MPa | 3 |
+| acciaio S235 Ø50×2 | 3.8 kg | 11 mm | 72 MPa | 3 |
+| carbonio Ø50×2 | 0.8 kg | 20 mm | 66 MPa | 8 |
 
 Il braccio **non è critico a resistenza** (il vento dimensiona zavorra e
 attuatori, non il tubo): si sceglie per rigidezza (freccia < 20 mm, altrimenti
