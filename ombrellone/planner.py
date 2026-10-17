@@ -39,7 +39,7 @@ _DEG = math.pi / 180.0
 # soluzione analitica
 # ----------------------------------------------------------------------------
 def analytic_pose(u: Umbrella, s: np.ndarray, t: Target, L: float | None = None,
-                  face_sun: bool = True) -> Pose | None:
+                  face_sun: bool = True, offset: float | None = None) -> Pose | None:
     """Posa che mette il centro dell'ombra esattamente sul centro del bersaglio.
 
     Restituisce ``None`` se la retta T->sole non interseca la sfera di raggio L
@@ -47,6 +47,7 @@ def analytic_pose(u: Umbrella, s: np.ndarray, t: Target, L: float | None = None,
     fine corsa).  Non controlla i limiti dei giunti: usare ``evaluate``.
     """
     L = L if L is not None else u.L
+    e_off = offset if offset is not None else u.canopy_offset
     P = np.array([0.0, 0.0, u.H])
     T3 = np.array([t.x, t.y, 0.0])
     s = np.asarray(s, dtype=float)
@@ -55,7 +56,7 @@ def analytic_pose(u: Umbrella, s: np.ndarray, t: Target, L: float | None = None,
     # Con sbalzo si risolve iterativamente (converge in 2-3 passi).
     off = np.zeros(3)
     alpha = None
-    for _ in range(6 if u.canopy_offset else 1):
+    for _ in range(6 if e_off else 1):
         d = T3 - P - off
         b = 2.0 * float(d @ s)
         c = float(d @ d) - L * L
@@ -68,15 +69,16 @@ def analytic_pose(u: Umbrella, s: np.ndarray, t: Target, L: float | None = None,
         E = T3 + lam * s - off
         v = E - P
         alpha = math.degrees(math.atan2(v[0], v[1])) % 360.0
-        if u.canopy_offset:
-            off = u.canopy_offset * np.array([math.sin(alpha * _DEG), math.cos(alpha * _DEG), 0.0])
+        if e_off:
+            off = e_off * np.array([math.sin(alpha * _DEG), math.cos(alpha * _DEG), 0.0])
     theta = math.degrees(math.acos(max(-1.0, min(1.0, v[2] / L))))
     if face_sun:
         elev, az = vector_to_elev_az(s)
         beta, gamma = 90.0 - elev, az
     else:
         beta, gamma = 0.0, 0.0
-    return Pose(alpha, theta, beta, gamma, L if u.telescopic else None)
+    return Pose(alpha, theta, beta, gamma, L if u.telescopic else None,
+                e_off if u.mobile_offset else None)
 
 
 # ----------------------------------------------------------------------------
@@ -97,7 +99,15 @@ class Solution:
 
 def _unpack(x: np.ndarray, u: Umbrella) -> Pose:
     L = float(x[4]) if u.telescopic else None
-    return Pose(float(x[0]) % 360.0, float(x[1]), float(x[2]), float(x[3]) % 360.0, L)
+    off = float(x[5]) if u.mobile_offset else None
+    return Pose(float(x[0]) % 360.0, float(x[1]), float(x[2]), float(x[3]) % 360.0, L, off)
+
+
+def _clip_pose(p: Pose, u: Umbrella) -> Pose:
+    return Pose(p.alpha_deg, min(max(p.theta_deg, 0.0), u.theta_max_deg),
+                min(max(p.beta_deg, 0.0), u.beta_max_deg), p.gamma_deg,
+                None if not u.telescopic else min(max(p.L, u.L_min), u.L_max),
+                None if not u.mobile_offset else min(max(p.offset, u.offset_min), u.offset_max))
 
 
 def _objective(x: np.ndarray, u: Umbrella, s: np.ndarray, t: Target, prev: Pose | None,
@@ -109,9 +119,9 @@ def _objective(x: np.ndarray, u: Umbrella, s: np.ndarray, t: Target, prev: Pose 
     pen += max(0.0, -p.beta_deg) + max(0.0, p.beta_deg - u.beta_max_deg)
     if u.telescopic:
         pen += 10.0 * (max(0.0, u.L_min - p.L) + max(0.0, p.L - u.L_max))
-    pc = Pose(p.alpha_deg, min(max(p.theta_deg, 0.0), u.theta_max_deg),
-              min(max(p.beta_deg, 0.0), u.beta_max_deg), p.gamma_deg,
-              None if not u.telescopic else min(max(p.L, u.L_min), u.L_max))
+    if u.mobile_offset:
+        pen += 10.0 * (max(0.0, u.offset_min - p.offset) + max(0.0, p.offset - u.offset_max))
+    pc = _clip_pose(p, u)
     ev = evaluate(u, pc, s, t, n_disk=200, n_boundary=48)
     fk = ev.fk
     # quota minima e collisione: penalita' proporzionale alla violazione
@@ -137,23 +147,23 @@ def solve_pose(u: Umbrella, s: np.ndarray, t: Target, prev: Pose | None = None,
 
     best: Solution | None = None
 
-    # 1) analitica, nelle varianti con braccio nominale / telescopico
-    Ls = [None]
-    if u.telescopic:
-        Ls = list(np.linspace(u.L_min, u.L_max, 5))
+    # 1) analitica, campionando i gradi di liberta' lineari (braccio telescopico, sbalzo mobile)
+    Ls = list(np.linspace(u.L_min, u.L_max, 5)) if u.telescopic else [None]
+    offs = list(np.linspace(u.offset_min, u.offset_max, 5)) if u.mobile_offset else [None]
     for L in Ls:
-        for face in (True, False):
-            p = analytic_pose(u, s, t, L, face_sun=face)
-            if p is None:
-                continue
-            if p.theta_deg > u.theta_max_deg:
-                continue
-            # satura beta al limite se serve
-            p.beta_deg = min(p.beta_deg, u.beta_max_deg)
-            ev = evaluate(u, p, s, t)
-            cand = Solution(p, ev, "analitica", elev, az)
-            if ev.feasible and ev.margin >= 0 and (best is None or ev.margin > best.eval.margin):
-                best = cand
+        for off in offs:
+            for face in (True, False):
+                p = analytic_pose(u, s, t, L, face_sun=face, offset=off)
+                if p is None:
+                    continue
+                if p.theta_deg > u.theta_max_deg:
+                    continue
+                # satura beta al limite se serve
+                p.beta_deg = min(p.beta_deg, u.beta_max_deg)
+                ev = evaluate(u, p, s, t)
+                cand = Solution(p, ev, "analitica", elev, az)
+                if ev.feasible and ev.margin >= 0 and (best is None or ev.margin > best.eval.margin):
+                    best = cand
     if best is not None and (prev is None or w_move == 0.0):
         return best
 
@@ -165,26 +175,25 @@ def solve_pose(u: Umbrella, s: np.ndarray, t: Target, prev: Pose | None = None,
         # il braccio deve puntare circa dal palo verso il bersaglio spostato verso il sole
         base_alpha = math.degrees(math.atan2(t.x + 2 * s[0], t.y + 2 * s[1])) % 360.0
     L0 = u.L if not u.telescopic else u.L_max
-    starts.append([base_alpha, u.theta_max_deg, min(90 - elev, u.beta_max_deg), az, L0])
-    starts.append([base_alpha, u.theta_max_deg * 0.6, min(90 - elev, u.beta_max_deg) * 0.5, az, L0])
-    starts.append([az, u.theta_max_deg * 0.8, 0.0, az, L0])
+    O0 = u.canopy_offset if not u.mobile_offset else u.offset_max
+    starts.append([base_alpha, u.theta_max_deg, min(90 - elev, u.beta_max_deg), az, L0, O0])
+    starts.append([base_alpha, u.theta_max_deg * 0.6, min(90 - elev, u.beta_max_deg) * 0.5, az, L0, O0])
+    starts.append([az, u.theta_max_deg * 0.8, 0.0, az, L0, O0])
     if prev is not None:
         starts.append([prev.alpha_deg, prev.theta_deg, prev.beta_deg, prev.gamma_deg,
-                       prev.L if prev.L is not None else L0])
+                       prev.L if prev.L is not None else L0,
+                       prev.offset if prev.offset is not None else O0])
     while len(starts) < n_starts:
         starts.append([base_alpha + rng.uniform(-40, 40), rng.uniform(0, u.theta_max_deg),
                        rng.uniform(0, u.beta_max_deg), az + rng.uniform(-30, 30),
-                       L0 if not u.telescopic else rng.uniform(u.L_min, u.L_max)])
+                       L0 if not u.telescopic else rng.uniform(u.L_min, u.L_max),
+                       O0 if not u.mobile_offset else rng.uniform(u.offset_min, u.offset_max)])
 
     for x0 in starts:
         res = minimize(_objective, np.array(x0, dtype=float), args=(u, s, t, prev, w_move),
                        method="Nelder-Mead",
                        options={"xatol": 0.05, "fatol": 1e-4, "maxiter": 1500, "maxfev": 3000})
-        p = _unpack(res.x, u)
-        p.theta_deg = min(max(p.theta_deg, 0.0), u.theta_max_deg)
-        p.beta_deg = min(max(p.beta_deg, 0.0), u.beta_max_deg)
-        if u.telescopic:
-            p.L = min(max(p.L, u.L_min), u.L_max)
+        p = _clip_pose(_unpack(res.x, u), u)
         ev = evaluate(u, p, s, t)
         cand = Solution(p, ev, "numerica", elev, az)
         if best is None or _better(cand, best):

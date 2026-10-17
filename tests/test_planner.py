@@ -52,3 +52,17 @@ def test_plan_day_july_rimini():
     assert 9 <= w[0].hour <= 11 and 15 <= w[1].hour <= 18
     assert s["movimenti"] >= 3
     assert s["copertura_media_tenuta"] > 0.6
+
+
+def test_mobile_offset_extends_coverage():
+    """Sbalzo mobile (carrello): copertura totale anche con sole piu' basso."""
+    base = Umbrella()
+    mob = base.with_(offset_min=0.0, offset_max=0.8)
+    s = sun_vector_enu(38.0, 180.0)
+    assert not solve_pose(base, s, Target()).full_coverage
+    sol = solve_pose(mob, s, Target())
+    assert sol.full_coverage
+    assert sol.pose.offset is not None and 0.0 <= sol.pose.offset <= 0.8
+    # con sole alto lo sbalzo scelto resta piccolo (nessuna zona morta)
+    hi = solve_pose(mob, sun_vector_enu(85.0, 180.0), Target())
+    assert hi.full_coverage

@@ -29,6 +29,10 @@ p.lead { color: var(--ink-2); margin: 6px 0 18px; max-width: 65ch }
 .ctl label { color: var(--ink-2) }
 .ctl output { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 5ch; text-align: right }
 .ctl input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--sea) }
+.ctl input[type=range]:disabled { opacity: .35 }
+.ctl .chk { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--ink-2); margin-top: 2px }
+.ctl .chk input { accent-color: var(--sea) }
+.mob { color: var(--sea); font-size: 11px; font-weight: 600 }
 .ctl input[type=number], .ctl input[type=date], .ctl select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; width: 100% }
 .row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
 button { font: inherit; font-weight: 600; background: var(--sea); color: #fff; border: 0; border-radius: 7px; padding: 7px 12px; cursor: pointer }
@@ -71,9 +75,12 @@ td, th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line
       <div class="row"><button id="play" class="ghost">▶ Giornata</button><button id="now" class="ghost">Adesso</button></div>
 
       <h2 style="margin-top:18px">Geometria (metri, gradi)</h2>
-      <div class="ctl"><label for="H">Altezza palo fisso H</label><output id="Ho"></output><input id="H" type="range" min="1.2" max="3.0" step="0.05" value="2.0"></div>
-      <div class="ctl"><label for="L">Lunghezza braccio L</label><output id="Lo"></output><input id="L" type="range" min="0.6" max="3.0" step="0.05" value="1.6"></div>
-      <div class="ctl"><label for="off">Sbalzo tettuccio</label><output id="offo"></output><input id="off" type="range" min="0" max="1.2" step="0.05" value="0"></div>
+      <div class="ctl"><label for="H">Altezza palo H <span class="mob" id="Hlab"></span></label><output id="Ho"></output><input id="H" type="range" min="1.2" max="3.0" step="0.05" value="2.0">
+        <label class="chk"><input id="telH" type="checkbox"> palo telescopico (H mobile fino a)</label><output id="Hmaxo"></output><input id="Hmax" type="range" min="1.2" max="3.5" step="0.05" value="2.6" disabled></div>
+      <div class="ctl"><label for="L">Lunghezza braccio L <span class="mob" id="Llab"></span></label><output id="Lo"></output><input id="L" type="range" min="0.6" max="3.0" step="0.05" value="1.6">
+        <label class="chk"><input id="telL" type="checkbox"> braccio telescopico (L mobile fino a)</label><output id="Lmaxo"></output><input id="Lmax" type="range" min="0.6" max="3.5" step="0.05" value="2.4" disabled></div>
+      <div class="ctl"><label for="off">Sbalzo tettuccio <span class="mob" id="offlab"></span></label><output id="offo"></output><input id="off" type="range" min="0" max="1.5" step="0.05" value="0">
+        <label class="chk"><input id="telOff" type="checkbox"> sbalzo mobile (carrello, fino a)</label><output id="offmaxo"></output><input id="offmax" type="range" min="0" max="2.0" step="0.05" value="0.8" disabled></div>
       <div class="ctl"><label for="R">Raggio tettuccio R</label><output id="Ro"></output><input id="R" type="range" min="0.5" max="2.5" step="0.05" value="1.5"></div>
       <div class="ctl"><label for="thmax">Inclinazione max braccio</label><output id="thmaxo"></output><input id="thmax" type="range" min="20" max="90" step="1" value="70"></div>
       <div class="ctl"><label for="bemax">Inclinazione max tettuccio</label><output id="bemaxo"></output><input id="bemax" type="range" min="0" max="90" step="1" value="70"></div>
@@ -82,7 +89,7 @@ td, th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line
       <h2 style="margin-top:18px">Zona da coprire</h2>
       <div class="ctl"><label for="rt">Raggio zona</label><output id="rto"></output><input id="rt" type="range" min="0.3" max="2.0" step="0.05" value="1.0"></div>
       <div class="row"><button id="center" class="ghost">Centra sul palo</button><button id="south" class="ghost">Palo a Sud della zona</button></div>
-      <small class="hint">Sulla pianta il Nord è in alto. Trascina il cerchio verde per spostare la zona.</small>
+      <small class="hint">Sulla pianta il Nord è in alto. Trascina il cerchio verde per spostare la zona. Con un grado di libertà "mobile" il primo cursore è il minimo e il secondo il massimo: il solver sceglie il valore migliore istante per istante.</small>
     </div>
 
     <div>
@@ -99,6 +106,7 @@ td, th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line
           <div class="stat" id="sCov"><b>—</b><span>zona in ombra</span></div>
           <div class="stat" id="sMar"><b>—</b><span>margine sul bordo</span></div>
           <div class="stat" id="sPose"><b>—</b><span>giunti α / θ / β</span></div>
+          <div class="stat" id="sLen"><b>—</b><span>H / L / sbalzo usati</span></div>
           <div class="stat" id="sLow"><b>—</b><span>bordo più basso del tettuccio</span></div>
         </div>
         <h2 style="margin-top:16px">Giornata: quando la copertura è totale</h2>
@@ -156,13 +164,20 @@ const dirv = (azD, tiltD) => { const a = azD * DEG, t = tiltD * DEG; return [Mat
 const sunVec = s => dirv(s.az, 90 - s.elev);
 
 // ---------------------------------------------------------------- geometria
-const P = { H: 2, L: 1.6, off: 0, R: 1.5, thmax: 70, bemax: 70, hmin: 1.6 };
+const P = { H: 2, L: 1.6, off: 0, R: 1.5, thmax: 70, bemax: 70, hmin: 1.6,
+            telH: false, Hmax: 2.6, telL: false, Lmax: 2.4, telOff: false, offmax: 0.8 };
+// intervalli effettivi dei gradi di liberta' lineari (min = cursore principale)
+const rangeOf = k => k === 'H' ? [P.H, P.telH ? Math.max(P.H, P.Hmax) : P.H]
+                   : k === 'L' ? [P.L, P.telL ? Math.max(P.L, P.Lmax) : P.L]
+                   : [P.off, P.telOff ? Math.max(P.off, P.offmax) : P.off];
+const lin = (a, n) => { const [lo, hi] = a; if (hi - lo < 1e-6) return [lo]; const out = []; for (let i = 0; i < n; i++) out.push(lo + (hi - lo) * i / (n - 1)); return out; };
 const T = { x: 0, y: 0, r: 1.0 };
 function fk(p) {
+  const H = p.H ?? P.H, L = p.L ?? P.L, off = p.off ?? P.off;
   const ad = dirv(p.alpha, p.theta);
-  const E = [P.L * ad[0], P.L * ad[1], P.H + P.L * ad[2]];
-  const C = [E[0] + P.off * Math.sin(p.alpha * DEG), E[1] + P.off * Math.cos(p.alpha * DEG), E[2]];
-  return { E, C, n: dirv(p.gamma, p.beta) };
+  const E = [L * ad[0], L * ad[1], H + L * ad[2]];
+  const C = [E[0] + off * Math.sin(p.alpha * DEG), E[1] + off * Math.cos(p.alpha * DEG), E[2]];
+  return { E, C, n: dirv(p.gamma, p.beta), H, L, off };
 }
 function basis(n) {
   const ref = Math.abs(n[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0];
@@ -182,7 +197,9 @@ function evaluate(p, s) {
   const { G, M } = shadow(C, n, P.R, s);
   const det = M[0] * M[3] - M[2] * M[1];
   const zlow = C[2] - P.R * Math.sqrt(Math.max(0, 1 - n[2] * n[2]));
-  const feasible = p.theta >= -0.01 && p.theta <= P.thmax + 0.01 && p.beta >= -0.01 && p.beta <= P.bemax + 0.01 && zlow >= P.hmin - 0.005;
+  const inR = (v, r) => v >= r[0] - 1e-6 && v <= r[1] + 1e-6;
+  const feasible = p.theta >= -0.01 && p.theta <= P.thmax + 0.01 && p.beta >= -0.01 && p.beta <= P.bemax + 0.01 && zlow >= P.hmin - 0.005
+    && inR(p.H ?? P.H, rangeOf('H')) && inR(p.L ?? P.L, rangeOf('L')) && inR(p.off ?? P.off, rangeOf('off'));
   if (Math.abs(det) < 1e-9) return { margin: -10, coverage: 0, zlow, feasible, G, M };
   const inv = [M[3] / det, -M[1] / det, -M[2] / det, M[0] / det];
   let maxRho = 0, inside = 0; const NB = 48, ND = 120;
@@ -192,42 +209,61 @@ function evaluate(p, s) {
     const a = inv[0] * qx + inv[2] * qy, b = inv[1] * qx + inv[3] * qy; if (a * a + b * b <= 1) inside++; }
   return { margin: 1 - maxRho, coverage: inside / ND, zlow, feasible, G, M };
 }
-function analytic(s, sun) {
+function analytic(s, sun, H, L, off) {
   let ox = 0, oy = 0, alpha = 180, theta = 0;
-  for (let it = 0; it < (P.off > 0 ? 4 : 1); it++) {
-    const dx = T.x - ox, dy = T.y - oy, dz = -P.H;
-    const b = 2 * (dx * s[0] + dy * s[1] + dz * s[2]), c = dx * dx + dy * dy + dz * dz - P.L * P.L;
+  for (let it = 0; it < (off > 0 ? 5 : 1); it++) {
+    const dx = T.x - ox, dy = T.y - oy, dz = -H;
+    const b = 2 * (dx * s[0] + dy * s[1] + dz * s[2]), c = dx * dx + dy * dy + dz * dz - L * L;
     const disc = b * b - 4 * c; if (disc < 0) return null;
     const lam = (-b + Math.sqrt(disc)) / 2; if (lam <= 0) return null;
     const ex = dx + lam * s[0], ey = dy + lam * s[1], ez = dz + lam * s[2];
     alpha = ((Math.atan2(ex, ey) / DEG) % 360 + 360) % 360;
-    theta = Math.acos(Math.max(-1, Math.min(1, ez / P.L))) / DEG;
-    ox = P.off * Math.sin(alpha * DEG); oy = P.off * Math.cos(alpha * DEG);
+    theta = Math.acos(Math.max(-1, Math.min(1, ez / L))) / DEG;
+    ox = off * Math.sin(alpha * DEG); oy = off * Math.cos(alpha * DEG);
   }
-  return { alpha, theta, beta: 90 - sun.elev, gamma: sun.az };
+  return { alpha, theta, beta: 90 - sun.elev, gamma: sun.az, H, L, off };
 }
 const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
 const score = e => (e.coverage + (e.margin > 0 ? 0.2 * Math.min(e.margin, 0.5) : 2 * e.margin)) - (e.feasible ? 0 : 5);
+// Posa ottima.  I gradi di liberta' lineari mobili (H, L, sbalzo) vengono
+// campionati nei loro intervalli per la soluzione analitica; se nessuna
+// combinazione copre tutta la zona, una ricerca a pattern lavora su tutti i
+// giunti (angolari e lineari) massimizzando copertura e margine.
 function solve(sun) {
   const s = sunVec(sun);
-  let p = analytic(s, sun) || { alpha: sun.az, theta: P.thmax, beta: Math.min(90 - sun.elev, P.bemax), gamma: sun.az };
-  p.theta = clamp(p.theta, 0, P.thmax); p.beta = clamp(p.beta, 0, P.bemax);
-  let e = evaluate(p, s);
-  while (e.zlow < P.hmin && p.beta > 0.5) { p.beta -= 1; e = evaluate(p, s); }
+  const rH = rangeOf('H'), rL = rangeOf('L'), rO = rangeOf('off');
+  const fallback = { alpha: sun.az, theta: P.thmax, beta: Math.min(90 - sun.elev, P.bemax), gamma: sun.az, H: rH[0], L: rL[1], off: rO[1] };
+  let bestP = null, bestE = null, bestSc = -Infinity;
+  for (const H of lin(rH, 4)) for (const L of lin(rL, 6)) for (const off of lin(rO, 6)) {
+    let p = analytic(s, sun, H, L, off); if (!p) continue;
+    p.theta = clamp(p.theta, 0, P.thmax); p.beta = clamp(p.beta, 0, P.bemax);
+    let e = evaluate(p, s);
+    while (e.zlow < P.hmin && p.beta > 0.5) { p.beta -= 1; e = evaluate(p, s); }
+    const sc = score(e) - (e.feasible && e.margin >= 0 ? 0.02 * ((L - rL[0]) + (off - rO[0]) + (H - rH[0])) : 0); // a parita', estensioni minime
+    if (sc > bestSc) { bestSc = sc; bestP = p; bestE = e; }
+  }
+  let p = bestP || fallback, e = bestE || evaluate(p, s);
   if (e.feasible && e.margin >= 0) return { p, e, s };
-  let step = 8, best = score(e);
-  for (let iter = 0; iter < 80; iter++) {
+  const mobile = [rH[1] - rH[0] > 1e-6, rL[1] - rL[0] > 1e-6, rO[1] - rO[0] > 1e-6];
+  let step = 8, lstep = 0.15, best = score(e);
+  for (let iter = 0; iter < 90; iter++) {
     let improved = false;
-    for (let j = 0; j < 4; j++) for (const sg of [-1, 1]) {
-      const q = { ...p };
-      if (j === 0) q.alpha = ((q.alpha + sg * step) % 360 + 360) % 360;
-      if (j === 1) q.theta = clamp(q.theta + sg * step, 0, P.thmax);
-      if (j === 2) q.beta = clamp(q.beta + sg * step, 0, P.bemax);
-      if (j === 3) q.gamma = ((q.gamma + sg * step) % 360 + 360) % 360;
-      const eq = evaluate(q, s), sc = score(eq);
-      if (sc > best + 1e-6) { best = sc; p = q; e = eq; improved = true; }
+    for (let j = 0; j < 7; j++) {
+      if (j >= 4 && !mobile[j - 4]) continue;
+      for (const sg of [-1, 1]) {
+        const q = { ...p };
+        if (j === 0) q.alpha = ((q.alpha + sg * step) % 360 + 360) % 360;
+        if (j === 1) q.theta = clamp(q.theta + sg * step, 0, P.thmax);
+        if (j === 2) q.beta = clamp(q.beta + sg * step, 0, P.bemax);
+        if (j === 3) q.gamma = ((q.gamma + sg * step) % 360 + 360) % 360;
+        if (j === 4) q.H = clamp(q.H + sg * lstep, rH[0], rH[1]);
+        if (j === 5) q.L = clamp(q.L + sg * lstep, rL[0], rL[1]);
+        if (j === 6) q.off = clamp(q.off + sg * lstep, rO[0], rO[1]);
+        const eq = evaluate(q, s), sc = score(eq);
+        if (sc > best + 1e-6) { best = sc; p = q; e = eq; improved = true; }
+      }
     }
-    if (!improved) { step /= 2; if (step < 0.2) break; }
+    if (!improved) { step /= 2; lstep /= 2; if (step < 0.2) break; }
   }
   return { p, e, s };
 }
@@ -235,14 +271,17 @@ function solve(sun) {
 // ---------------------------------------------------------------- UI
 const $ = id => document.getElementById(id);
 const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
-const ranges = { H: 'Ho', L: 'Lo', off: 'offo', R: 'Ro', thmax: 'thmaxo', bemax: 'bemaxo', hmin: 'hmino' };
+const ranges = { H: 'Ho', L: 'Lo', off: 'offo', R: 'Ro', thmax: 'thmaxo', bemax: 'bemaxo', hmin: 'hmino', Hmax: 'Hmaxo', Lmax: 'Lmaxo', offmax: 'offmaxo' };
 for (const k in ranges) $(k).addEventListener('input', () => { P[k] = +$(k).value; refresh(true); });
+for (const [chk, k, sl] of [['telH', 'telH', 'Hmax'], ['telL', 'telL', 'Lmax'], ['telOff', 'telOff', 'offmax']])
+  $(chk).addEventListener('change', () => { P[k] = $(chk).checked; $(sl).disabled = !P[k]; refresh(true); });
 $('rt').addEventListener('input', () => { T.r = +$('rt').value; refresh(true); });
 $('time').addEventListener('input', () => refresh(false));
 ['lat', 'lon', 'date', 'tz'].forEach(id => $(id).addEventListener('change', () => refresh(true)));
 $('place').addEventListener('change', () => { const v = $('place').value; if (v !== 'custom') { const [la, lo] = v.split(','); $('lat').value = la; $('lon').value = lo; refresh(true); } });
 $('center').onclick = () => { T.x = 0; T.y = 0; refresh(true); };
 $('south').onclick = () => { T.x = 0; T.y = P.L * 0.75; refresh(true); };
+const fmtM = v => v.toFixed(2) + ' m';
 $('now').onclick = () => { const n = new Date(); $('date').value = n.toISOString().slice(0, 10); $('tz').value = -n.getTimezoneOffset() / 60; $('time').value = n.getHours() * 60 + n.getMinutes(); refresh(true); };
 let playing = null;
 $('play').onclick = () => { if (playing) { clearInterval(playing); playing = null; $('play').textContent = '▶ Giornata'; return; }
@@ -264,7 +303,7 @@ function ellipsePath(ctx, G, M, k = 72) { ctx.beginPath(); for (let i = 0; i <= 
 
 function drawTop(sol, sun) {
   const W = topC.width, Hh = topC.height; tctx.clearRect(0, 0, W, Hh);
-  const reach = Math.max(P.L + P.R + P.off + 0.6, Math.hypot(T.x, T.y) + T.r + 0.6, 3.2); scale = W / 2 / reach;
+  const reach = Math.max(rangeOf('L')[1] + P.R + rangeOf('off')[1] + 0.6, Math.hypot(T.x, T.y) + T.r + 0.6, 3.2); scale = W / 2 / reach;
   tctx.strokeStyle = css('--line'); tctx.lineWidth = 1;
   for (let g = -Math.ceil(reach); g <= Math.ceil(reach); g++) { const [x0] = toPx(g, 0), [, y0] = toPx(0, g); tctx.beginPath(); tctx.moveTo(x0, 0); tctx.lineTo(x0, Hh); tctx.moveTo(0, y0); tctx.lineTo(W, y0); tctx.stroke(); }
   tctx.fillStyle = css('--ink-2'); tctx.font = '12px ' + css('--font-body'); tctx.fillText('N ↑', 10, 18); tctx.fillText('griglia 1 m', 10, Hh - 10);
@@ -293,7 +332,7 @@ function drawSide(sol, sun) {
   // asse orizzontale r lungo l'azimut del sole (positivo verso il sole), passante per la base del palo
   const az = sun.az * DEG, ux = Math.sin(az), uy = Math.cos(az);
   const proj = p => [p[0] * ux + p[1] * uy, p[2]];
-  const rmax = Math.max(P.L + P.R + P.off + 1, 4), zmax = P.H + P.L + P.R * 0.3 + 0.3;
+  const rmax = Math.max(rangeOf('L')[1] + P.R + rangeOf('off')[1] + 1, 4), zmax = rangeOf('H')[1] + rangeOf('L')[1] + P.R * 0.3 + 0.3;
   const sc = Math.min(W / (2 * rmax), Hh / (zmax + 0.4));
   const px = (r, z) => [W / 2 + r * sc, Hh - 30 - z * sc];
   sctx.strokeStyle = css('--line'); sctx.lineWidth = 1; for (let g = -Math.ceil(rmax); g <= Math.ceil(rmax); g++) { const [x0] = px(g, 0); sctx.beginPath(); sctx.moveTo(x0, 0); sctx.lineTo(x0, Hh - 30); sctx.stroke(); }
@@ -310,7 +349,7 @@ function drawSide(sol, sun) {
     const lam = p3[2] / s[2], g = [p3[0] - s[0] * lam, p3[1] - s[1] * lam, 0]; const [a, b] = px(...proj(p3)), [c, d] = px(...proj(g)); sctx.beginPath(); sctx.moveTo(a, b); sctx.lineTo(c, d); sctx.stroke(); }
   sctx.globalAlpha = 1;
   // palo, braccio, tettuccio
-  sctx.strokeStyle = css('--ink'); sctx.lineWidth = 6; sctx.lineCap = 'round'; const [bx, by] = px(0, 0), [tx, ty] = px(0, P.H); sctx.beginPath(); sctx.moveTo(bx, by); sctx.lineTo(tx, ty); sctx.stroke();
+  sctx.strokeStyle = css('--ink'); sctx.lineWidth = 6; sctx.lineCap = 'round'; const [bx, by] = px(0, 0), [tx, ty] = px(0, fk(sol.p).H); sctx.beginPath(); sctx.moveTo(bx, by); sctx.lineTo(tx, ty); sctx.stroke();
   const [ex, ey] = px(...proj(E)); sctx.lineWidth = 4; sctx.beginPath(); sctx.moveTo(tx, ty); sctx.lineTo(ex, ey); sctx.stroke();
   const [cx, cy] = px(...proj(C)); sctx.lineWidth = 3; sctx.beginPath(); sctx.moveTo(ex, ey); sctx.lineTo(cx, cy); sctx.stroke();
   sctx.strokeStyle = css('--sea'); sctx.lineWidth = 3; sctx.beginPath();
@@ -346,12 +385,13 @@ function drawTimeline(day, curM) {
   else { const gaps = []; for (let i = 1; i < full.length; i++) if (full[i].m - full[i - 1].m > 10) gaps.push(`${fmtT(full[i - 1].m + 10)}–${fmtT(full[i].m)}`);
     msg = `Copertura totale dalle ${fmtT(full[0].m)} alle ${fmtT(full[full.length - 1].m + 10)} (${(full.length / 6).toFixed(1)} h)` + (gaps.length ? `, con buchi: ${gaps.join(', ')}` : '') + '. Prima e dopo il sole è troppo basso: il braccio è a fine corsa e l’ombra scappa verso il lato opposto al sole.'; }
   $('window').textContent = msg;
-  const rows = day.filter(d => d.m % 60 === 0).map(d => `<tr><td>${fmtT(d.m)}</td><td>${d.sun.elev.toFixed(0)}°</td><td>${d.sun.az.toFixed(0)}°</td><td>${d.sol ? (100 * d.sol.e.coverage).toFixed(0) + ' %' : '—'}</td><td>${d.sol ? d.sol.p.theta.toFixed(0) + '°' : '—'}</td><td>${d.sol ? d.sol.p.beta.toFixed(0) + '°' : '—'}</td></tr>`).join('');
-  $('tbl').innerHTML = '<tr><th>ora</th><th>elev. sole</th><th>azimut</th><th>zona in ombra</th><th>θ braccio</th><th>β tettuccio</th></tr>' + rows;
+  const rows = day.filter(d => d.m % 60 === 0).map(d => `<tr><td>${fmtT(d.m)}</td><td>${d.sun.elev.toFixed(0)}°</td><td>${d.sun.az.toFixed(0)}°</td><td>${d.sol ? (100 * d.sol.e.coverage).toFixed(0) + ' %' : '—'}</td><td>${d.sol ? d.sol.p.theta.toFixed(0) + '°' : '—'}</td><td>${d.sol ? d.sol.p.beta.toFixed(0) + '°' : '—'}</td><td>${d.sol ? fk(d.sol.p).H.toFixed(2) + ' / ' + fk(d.sol.p).L.toFixed(2) + ' / ' + fk(d.sol.p).off.toFixed(2) : '—'}</td></tr>`).join('');
+  $('tbl').innerHTML = '<tr><th>ora</th><th>elev. sole</th><th>azimut</th><th>zona in ombra</th><th>θ braccio</th><th>β tettuccio</th><th>H / L / sbalzo [m]</th></tr>' + rows;
 }
 
 function refresh(recomputeDay) {
-  for (const k in ranges) $(ranges[k]).value = (k === 'thmax' || k === 'bemax') ? P[k] + '°' : P[k].toFixed(2) + ' m';
+  for (const k in ranges) $(ranges[k]).value = (k === 'thmax' || k === 'bemax') ? P[k] + '°' : fmtM(P[k]);
+  for (const [k, lab] of [['H', 'Hlab'], ['L', 'Llab'], ['off', 'offlab']]) { const r = rangeOf(k); $(lab).textContent = r[1] - r[0] > 1e-6 ? `mobile ${fmtM(r[0])} – ${fmtM(r[1])}` : ''; }
   $('rto').value = T.r.toFixed(2) + ' m';
   const m = +$('time').value; $('timeOut').value = fmtT(m);
   const sun = sunPosition(localToUTC(m), +$('lat').value, +$('lon').value);
@@ -364,7 +404,8 @@ function refresh(recomputeDay) {
     set('sMar', `${(100 * sol.e.margin * T.r).toFixed(0)} cm`, sol.e.margin >= 0 ? 'ok' : 'bad');
     set('sPose', `${sol.p.alpha.toFixed(0)}° / ${sol.p.theta.toFixed(0)}° / ${sol.p.beta.toFixed(0)}°`, sol.p.theta > P.thmax - 0.5 ? 'warn' : '');
     set('sLow', `${sol.e.zlow.toFixed(2)} m`, sol.e.zlow < P.hmin + 0.02 ? 'warn' : '');
-  } else { set('sCov', '—'); set('sMar', '—'); set('sPose', 'parcheggio'); set('sLow', '—'); }
+    const f = fk(sol.p); set('sLen', `${f.H.toFixed(2)} / ${f.L.toFixed(2)} / ${f.off.toFixed(2)} m`);
+  } else { set('sCov', '—'); set('sMar', '—'); set('sPose', 'parcheggio'); set('sLow', '—'); set('sLen', '—'); }
   if (recomputeDay || !dayCache) dayCache = computeDay();
   drawTimeline(dayCache, m);
 }

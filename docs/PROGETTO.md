@@ -168,9 +168,19 @@ Dallo sweep sulle varianti (`figure/06_varianti.png` e `risultati.md`):
    deve comunque stare sopra le teste.
 7. **Abbassare h_min** non serve a niente: il limite è lo sbraccio, non la quota.
 
-Combinando palo a Sud + sbalzo 0.6 + braccio telescopico si scende a ~27° con
-sole a Sud-Ovest: copertura totale dalle 9:30 alle 17:00 a luglio. Oltre si va
-solo con un meccanismo diverso (sezione 10: carrello a terra o rotaia).
+**Gradi di libertà "mobili" (nel simulatore: casella "telescopico"/"mobile").**
+Invece di fissare L e sbalzo, si dà un intervallo e il solver sceglie il valore
+migliore istante per istante (piccolo con sole alto, massimo con sole basso):
+così non c'è zona morta. Sul 15 luglio a Rimini, zona centrata:
+
+| gradi di libertà | finestra di copertura totale |
+|---|---|
+| progetto base (tutto fisso) | 10:00–16:40 (6.7 h) |
+| + braccio telescopico 1.6–2.4 m | 09:30–17:20 (7.8 h) |
+| + sbalzo mobile 0–0.8 m (carrello sotto il tettuccio) | **08:40–18:00 (9.3 h)** |
+| + palo telescopico 2.0–2.6 m | nessun guadagno (l'altezza non aiuta) |
+
+Oltre si va solo con un meccanismo diverso (sezione 10: carrello a terra o rotaia).
 
 ---
 

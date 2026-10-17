@@ -36,6 +36,8 @@ class Umbrella:
     canopy_offset: float = 0.0     # sbalzo del centro tettuccio lungo il braccio (orizz.)
     L_min: float | None = None     # braccio telescopico: lunghezza minima
     L_max: float | None = None     # braccio telescopico: lunghezza massima
+    offset_min: float | None = None  # sbalzo mobile (carrello): minimo
+    offset_max: float | None = None  # sbalzo mobile (carrello): massimo
     pole_radius: float = 0.04      # raggio palo (per il controllo collisioni)
     alpha_min_deg: float = -1e9    # fine corsa azimut (default: rotazione libera)
     alpha_max_deg: float = 1e9
@@ -43,6 +45,11 @@ class Umbrella:
     @property
     def telescopic(self) -> bool:
         return self.L_min is not None and self.L_max is not None and self.L_max > self.L_min
+
+    @property
+    def mobile_offset(self) -> bool:
+        return (self.offset_min is not None and self.offset_max is not None
+                and self.offset_max > self.offset_min)
 
     def with_(self, **kw) -> "Umbrella":
         return replace(self, **kw)
@@ -56,10 +63,12 @@ class Pose:
     beta_deg: float = 0.0    # inclinazione tettuccio dalla verticale
     gamma_deg: float = 0.0   # azimut della normale del tettuccio
     L: float | None = None   # lunghezza braccio (None = nominale)
+    offset: float | None = None  # sbalzo (None = nominale)
 
     def as_array(self) -> np.ndarray:
         return np.array([self.alpha_deg, self.theta_deg, self.beta_deg, self.gamma_deg,
-                         self.L if self.L is not None else np.nan])
+                         self.L if self.L is not None else np.nan,
+                         self.offset if self.offset is not None else np.nan])
 
     def joint_distance_deg(self, other: "Pose") -> float:
         """Somma dei movimenti angolari fra due pose (per stimare consumo/rumore)."""
@@ -94,12 +103,13 @@ def direction(azimuth_deg: float, tilt_from_vertical_deg: float) -> np.ndarray:
 def forward_kinematics(u: Umbrella, p: Pose) -> dict:
     """Restituisce i punti notevoli della struttura per la posa ``p``."""
     L = p.L if p.L is not None else u.L
+    off = p.offset if p.offset is not None else u.canopy_offset
     P = np.array([0.0, 0.0, u.H])
     arm_dir = direction(p.alpha_deg, p.theta_deg)
     E = P + L * arm_dir                                     # estremita' del braccio
-    C = E + u.canopy_offset * horiz_unit(p.alpha_deg)       # centro tettuccio
+    C = E + off * horiz_unit(p.alpha_deg)                   # centro tettuccio
     n = direction(p.gamma_deg, p.beta_deg)                  # normale tettuccio
-    return {"P": P, "E": E, "C": C, "n": n, "arm_dir": arm_dir, "L": L}
+    return {"P": P, "E": E, "C": C, "n": n, "arm_dir": arm_dir, "L": L, "offset": off}
 
 
 def canopy_basis(n: np.ndarray) -> tuple[np.ndarray, np.ndarray]:
@@ -198,6 +208,10 @@ def check_constraints(u: Umbrella, p: Pose, fk: dict) -> tuple[list[str], float]
     if u.telescopic:
         if L < u.L_min - 1e-9 or L > u.L_max + 1e-9:
             v.append(f"L={L:.2f} fuori [{u.L_min},{u.L_max}]")
+    if u.mobile_offset:
+        off = fk["offset"]
+        if off < u.offset_min - 1e-9 or off > u.offset_max + 1e-9:
+            v.append(f"sbalzo={off:.2f} fuori [{u.offset_min},{u.offset_max}]")
     C, n = fk["C"], fk["n"]
     sin_tilt = math.sqrt(max(0.0, 1.0 - n[2] ** 2))
     z_low = C[2] - u.R * sin_tilt
