@@ -1,0 +1,9 @@
+[project]
+name = "ombrellone"
+version = "0.1.0"
+description = "Ombrellone robotico che tiene ferma l'ombra: algoritmo, simulazione, meccanica"
+requires-python = ">=3.10"
+dependencies = ["numpy>=1.26", "scipy>=1.11", "matplotlib>=3.8"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

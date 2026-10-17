@@ -1,0 +1,373 @@
+<title>Ombrellone Magico</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<style>
+/* layout: colonna controlli a sinistra, due viste (pianta + sezione) a destra, timeline della giornata sotto */
+:root {
+  --bg: #eef2f5; --surface: #ffffff; --ink: #16222e; --ink-2: #566371; --line: #d6dde3;
+  --sun: #d9960f; --sea: #1f6f8b; --shade: #6b7680; --ok: #1e8a4c; --warn: #c2731a; --bad: #c0392b;
+  --font-display: "Manrope", "Avenir Next", "Segoe UI", sans-serif;
+  --font-body: "IBM Plex Sans", "Helvetica Neue", Arial, sans-serif;
+}
+@media (prefers-color-scheme: dark) { :root:not([data-theme="light"]) {
+  --bg: #0f161d; --surface: #182330; --ink: #e7edf2; --ink-2: #a3b0bc; --line: #2b3946;
+  --sun: #f0b429; --sea: #4fa3c0; --shade: #8e9aa6; --ok: #43b474; --warn: #e2954a; --bad: #e0675b; color-scheme: dark } }
+:root[data-theme="dark"] {
+  --bg: #0f161d; --surface: #182330; --ink: #e7edf2; --ink-2: #a3b0bc; --line: #2b3946;
+  --sun: #f0b429; --sea: #4fa3c0; --shade: #8e9aa6; --ok: #43b474; --warn: #e2954a; --bad: #e0675b; color-scheme: dark }
+* { box-sizing: border-box }
+body { background: var(--bg); color: var(--ink); font-family: var(--font-body); font-size: 14px; line-height: 1.45;
+  padding-left: max(16px, env(safe-area-inset-left, 0px)); padding-right: max(16px, env(safe-area-inset-right, 0px)); padding-block: 20px 40px; }
+h1 { font-family: var(--font-display); font-weight: 800; font-size: clamp(22px, 3vw, 30px); margin: 0; letter-spacing: -0.01em; text-wrap: balance }
+h2 { font-family: var(--font-display); font-weight: 700; font-size: 13px; text-transform: uppercase; letter-spacing: 0.08em; color: var(--ink-2); margin: 0 0 10px }
+p.lead { color: var(--ink-2); margin: 6px 0 18px; max-width: 65ch }
+.wrap { max-width: 1180px; margin: 0 auto }
+.grid { display: grid; grid-template-columns: 300px 1fr; gap: 18px; align-items: start }
+@media (max-width: 820px) { .grid { grid-template-columns: 1fr } }
+.panel { background: var(--surface); border: 1px solid var(--line); border-radius: 10px; padding: 14px 16px; min-width: 0 }
+.ctl { display: grid; grid-template-columns: 1fr auto; gap: 4px 10px; align-items: center; margin: 8px 0 }
+.ctl label { color: var(--ink-2) }
+.ctl output { font-variant-numeric: tabular-nums; font-weight: 600; min-width: 5ch; text-align: right }
+.ctl input[type=range] { grid-column: 1 / -1; width: 100%; accent-color: var(--sea) }
+.ctl input[type=number], .ctl input[type=date], .ctl select { font: inherit; color: var(--ink); background: var(--bg); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; width: 100% }
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center }
+button { font: inherit; font-weight: 600; background: var(--sea); color: #fff; border: 0; border-radius: 7px; padding: 7px 12px; cursor: pointer }
+button.ghost { background: transparent; color: var(--sea); border: 1px solid var(--sea) }
+button:focus-visible, input:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px }
+.views { display: grid; grid-template-columns: 1fr 1fr; gap: 18px }
+@media (max-width: 1000px) { .views { grid-template-columns: 1fr } }
+canvas { width: 100%; max-width: 100%; aspect-ratio: 1; display: block; border-radius: 8px; background: var(--bg); touch-action: none }
+#side { aspect-ratio: 1.3 }
+.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; margin-top: 14px }
+.stat { border-left: 3px solid var(--line); padding: 2px 0 2px 10px }
+.stat b { display: block; font-family: var(--font-display); font-size: 22px; font-weight: 700; font-variant-numeric: tabular-nums; line-height: 1.1 }
+.stat span { color: var(--ink-2); font-size: 12px }
+.stat.ok { border-color: var(--ok) } .stat.warn { border-color: var(--warn) } .stat.bad { border-color: var(--bad) }
+#timeline { aspect-ratio: auto; height: 86px }
+.legend { display: flex; gap: 14px; flex-wrap: wrap; color: var(--ink-2); font-size: 12px; margin-top: 8px }
+.legend i { display: inline-block; width: 12px; height: 12px; border-radius: 3px; vertical-align: -2px; margin-right: 5px }
+small.hint { color: var(--ink-2); display: block; margin-top: 6px }
+details { margin-top: 14px; color: var(--ink-2) } summary { cursor: pointer; color: var(--ink); font-weight: 600 }
+table { border-collapse: collapse; width: 100%; font-variant-numeric: tabular-nums; margin-top: 8px }
+td, th { text-align: left; padding: 4px 6px; border-bottom: 1px solid var(--line) } th { color: var(--ink-2); font-weight: 600 }
+@media (prefers-reduced-motion: reduce) { * { transition: none !important } }
+</style>
+
+<div class="wrap">
+  <h1>Ombrellone Magico — simulatore</h1>
+  <p class="lead">Scegli luogo, giorno e geometria. Trascina il cerchio sulla pianta per decidere la zona che deve restare in ombra: il simulatore calcola la posa dei giunti, l'ombra reale e fino a che ora l'ombrellone ce la fa.</p>
+
+  <div class="grid">
+    <div class="panel">
+      <h2>Luogo e tempo</h2>
+      <div class="ctl"><label for="place">Località</label>
+        <select id="place"><option value="44.06,12.57">Rimini</option><option value="45.46,9.19">Milano</option><option value="41.90,12.50">Roma</option><option value="38.12,13.36">Palermo</option><option value="40.63,14.60">Costiera amalfitana</option><option value="custom">Personalizzata</option></select>
+        <label for="lat">Lat</label><input id="lat" type="number" step="0.01" value="44.06">
+        <label for="lon">Lon</label><input id="lon" type="number" step="0.01" value="12.57">
+        <label for="date">Giorno</label><input id="date" type="date" value="2026-07-15">
+        <label for="tz">Fuso (ore da UTC)</label><input id="tz" type="number" step="1" value="2">
+      </div>
+      <div class="ctl"><label for="time">Ora locale</label><output id="timeOut">13:00</output><input id="time" type="range" min="240" max="1320" step="5" value="780"></div>
+      <div class="row"><button id="play" class="ghost">▶ Giornata</button><button id="now" class="ghost">Adesso</button></div>
+
+      <h2 style="margin-top:18px">Geometria (metri, gradi)</h2>
+      <div class="ctl"><label for="H">Altezza palo fisso H</label><output id="Ho"></output><input id="H" type="range" min="1.2" max="3.0" step="0.05" value="2.0"></div>
+      <div class="ctl"><label for="L">Lunghezza braccio L</label><output id="Lo"></output><input id="L" type="range" min="0.6" max="3.0" step="0.05" value="1.6"></div>
+      <div class="ctl"><label for="off">Sbalzo tettuccio</label><output id="offo"></output><input id="off" type="range" min="0" max="1.2" step="0.05" value="0"></div>
+      <div class="ctl"><label for="R">Raggio tettuccio R</label><output id="Ro"></output><input id="R" type="range" min="0.5" max="2.5" step="0.05" value="1.5"></div>
+      <div class="ctl"><label for="thmax">Inclinazione max braccio</label><output id="thmaxo"></output><input id="thmax" type="range" min="20" max="90" step="1" value="70"></div>
+      <div class="ctl"><label for="bemax">Inclinazione max tettuccio</label><output id="bemaxo"></output><input id="bemax" type="range" min="0" max="90" step="1" value="70"></div>
+      <div class="ctl"><label for="hmin">Quota minima bordo</label><output id="hmino"></output><input id="hmin" type="range" min="0.5" max="2.2" step="0.05" value="1.6"></div>
+
+      <h2 style="margin-top:18px">Zona da coprire</h2>
+      <div class="ctl"><label for="rt">Raggio zona</label><output id="rto"></output><input id="rt" type="range" min="0.3" max="2.0" step="0.05" value="1.0"></div>
+      <div class="row"><button id="center" class="ghost">Centra sul palo</button><button id="south" class="ghost">Palo a Sud della zona</button></div>
+      <small class="hint">Sulla pianta il Nord è in alto. Trascina il cerchio verde per spostare la zona.</small>
+    </div>
+
+    <div>
+      <div class="views">
+        <div class="panel"><h2>Pianta (vista dall'alto)</h2><canvas id="top" width="600" height="600"></canvas>
+          <div class="legend"><span><i style="background:var(--shade);opacity:.45"></i>ombra</span><span><i style="background:var(--ok)"></i>zona coperta</span><span><i style="background:var(--bad)"></i>zona scoperta</span><span><i style="background:var(--sun)"></i>direzione del sole</span><span><i style="background:var(--sea)"></i>tettuccio</span></div></div>
+        <div class="panel"><h2>Sezione nel piano verticale del sole</h2><canvas id="side" width="600" height="460"></canvas>
+          <small class="hint">Le linee gialle sono i raggi dal bordo del tettuccio al suolo. La barra a terra è la zona richiesta, nella direzione del sole.</small></div>
+      </div>
+      <div class="panel" style="margin-top:18px">
+        <h2>Stato</h2>
+        <div class="stats">
+          <div class="stat" id="sSun"><b>—</b><span>sole: elevazione / azimut</span></div>
+          <div class="stat" id="sCov"><b>—</b><span>zona in ombra</span></div>
+          <div class="stat" id="sMar"><b>—</b><span>margine sul bordo</span></div>
+          <div class="stat" id="sPose"><b>—</b><span>giunti α / θ / β</span></div>
+          <div class="stat" id="sLow"><b>—</b><span>bordo più basso del tettuccio</span></div>
+        </div>
+        <h2 style="margin-top:16px">Giornata: quando la copertura è totale</h2>
+        <canvas id="timeline" width="900" height="86"></canvas>
+        <div class="legend"><span><i style="background:var(--ok)"></i>copertura totale</span><span><i style="background:var(--warn)"></i>parziale (≥ 80 %)</span><span><i style="background:var(--bad)"></i>scoperta</span><span><i style="background:var(--line)"></i>sole basso / notte</span></div>
+        <p id="window" style="margin:10px 0 0;font-weight:600"></p>
+        <details><summary>Tabella oraria</summary><div style="overflow-x:auto"><table id="tbl"></table></div></details>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+'use strict';
+const DEG = Math.PI / 180;
+// ---------------------------------------------------------------- sole (NOAA)
+function sunPosition(dateUTC, lat, lon) {
+  const y0 = dateUTC.getUTCFullYear(), m0 = dateUTC.getUTCMonth() + 1;
+  const d = dateUTC.getUTCDate() + (dateUTC.getUTCHours() + (dateUTC.getUTCMinutes() + dateUTC.getUTCSeconds() / 60) / 60) / 24;
+  let y = y0, m = m0; if (m <= 2) { y -= 1; m += 12; }
+  const a = Math.floor(y / 100), b = 2 - a + Math.floor(a / 4);
+  const jd = Math.floor(365.25 * (y + 4716)) + Math.floor(30.6001 * (m + 1)) + d + b - 1524.5;
+  const jc = (jd - 2451545) / 36525;
+  const gml = ((280.46646 + jc * (36000.76983 + jc * 0.0003032)) % 360 + 360) % 360;
+  const gma = 357.52911 + jc * (35999.05029 - 0.0001537 * jc);
+  const ecc = 0.016708634 - jc * (0.000042037 + 0.0000001267 * jc);
+  const gmar = gma * DEG;
+  const ceq = Math.sin(gmar) * (1.914602 - jc * (0.004817 + 0.000014 * jc)) + Math.sin(2 * gmar) * (0.019993 - 0.000101 * jc) + Math.sin(3 * gmar) * 0.000289;
+  const tl = gml + ceq, omega = 125.04 - 1934.136 * jc;
+  const al = tl - 0.00569 - 0.00478 * Math.sin(omega * DEG);
+  const mo = 23 + (26 + (21.448 - jc * (46.815 + jc * (0.00059 - jc * 0.001813))) / 60) / 60;
+  const ob = mo + 0.00256 * Math.cos(omega * DEG);
+  const decl = Math.asin(Math.sin(ob * DEG) * Math.sin(al * DEG));
+  const yy = Math.tan(ob * DEG / 2) ** 2;
+  const eot = 4 / DEG * (yy * Math.sin(2 * gml * DEG) - 2 * ecc * Math.sin(gmar) + 4 * ecc * yy * Math.sin(gmar) * Math.cos(2 * gml * DEG) - 0.5 * yy * yy * Math.sin(4 * gml * DEG) - 1.25 * ecc * ecc * Math.sin(2 * gmar));
+  const minutes = dateUTC.getUTCHours() * 60 + dateUTC.getUTCMinutes() + dateUTC.getUTCSeconds() / 60;
+  const tsm = ((minutes + eot + 4 * lon) % 1440 + 1440) % 1440;
+  const ha = tsm / 4 - 180;
+  const latr = lat * DEG, har = ha * DEG;
+  let cz = Math.sin(latr) * Math.sin(decl) + Math.cos(latr) * Math.cos(decl) * Math.cos(har);
+  cz = Math.max(-1, Math.min(1, cz));
+  const zen = Math.acos(cz);
+  let elev = 90 - zen / DEG;
+  if (elev < 85) { const te = Math.tan(elev * DEG); let r;
+    if (elev > 5) r = 58.1 / te - 0.07 / te ** 3 + 0.000086 / te ** 5;
+    else if (elev > -0.575) r = 1735 + elev * (-518.2 + elev * (103.4 + elev * (-12.79 + elev * 0.711)));
+    else r = -20.774 / te; elev += r / 3600; }
+  const sz = Math.sin(zen); let az;
+  if (sz < 1e-9) az = 180; else {
+    const caz = Math.max(-1, Math.min(1, (Math.sin(latr) * cz - Math.sin(decl)) / (Math.cos(latr) * sz)));
+    az = Math.acos(caz) / DEG; az = ha > 0 ? (az + 180) % 360 : (540 - az) % 360; }
+  return { elev, az };
+}
+const dirv = (azD, tiltD) => { const a = azD * DEG, t = tiltD * DEG; return [Math.sin(t) * Math.sin(a), Math.sin(t) * Math.cos(a), Math.cos(t)]; };
+const sunVec = s => dirv(s.az, 90 - s.elev);
+
+// ---------------------------------------------------------------- geometria
+const P = { H: 2, L: 1.6, off: 0, R: 1.5, thmax: 70, bemax: 70, hmin: 1.6 };
+const T = { x: 0, y: 0, r: 1.0 };
+function fk(p) {
+  const ad = dirv(p.alpha, p.theta);
+  const E = [P.L * ad[0], P.L * ad[1], P.H + P.L * ad[2]];
+  const C = [E[0] + P.off * Math.sin(p.alpha * DEG), E[1] + P.off * Math.cos(p.alpha * DEG), E[2]];
+  return { E, C, n: dirv(p.gamma, p.beta) };
+}
+function basis(n) {
+  const ref = Math.abs(n[2]) < 0.9 ? [0, 0, 1] : [1, 0, 0];
+  let u1 = [n[1] * ref[2] - n[2] * ref[1], n[2] * ref[0] - n[0] * ref[2], n[0] * ref[1] - n[1] * ref[0]];
+  const l = Math.hypot(...u1); u1 = u1.map(v => v / l);
+  const u2 = [n[1] * u1[2] - n[2] * u1[1], n[2] * u1[0] - n[0] * u1[2], n[0] * u1[1] - n[1] * u1[0]];
+  return [u1, u2];
+}
+function shadow(C, n, R, s) {
+  const [u1, u2] = basis(n);
+  const proj = p => { const k = p[2] / s[2]; return [p[0] - s[0] * k, p[1] - s[1] * k]; };
+  const G = proj(C), p1 = proj([C[0] + R * u1[0], C[1] + R * u1[1], C[2] + R * u1[2]]), p2 = proj([C[0] + R * u2[0], C[1] + R * u2[1], C[2] + R * u2[2]]);
+  return { G, M: [p1[0] - G[0], p1[1] - G[1], p2[0] - G[0], p2[1] - G[1]] }; // M = [a c; b d] colonne
+}
+function evaluate(p, s) {
+  const { C, n } = fk(p);
+  const { G, M } = shadow(C, n, P.R, s);
+  const det = M[0] * M[3] - M[2] * M[1];
+  const zlow = C[2] - P.R * Math.sqrt(Math.max(0, 1 - n[2] * n[2]));
+  const feasible = p.theta >= -0.01 && p.theta <= P.thmax + 0.01 && p.beta >= -0.01 && p.beta <= P.bemax + 0.01 && zlow >= P.hmin - 0.005;
+  if (Math.abs(det) < 1e-9) return { margin: -10, coverage: 0, zlow, feasible, G, M };
+  const inv = [M[3] / det, -M[1] / det, -M[2] / det, M[0] / det];
+  let maxRho = 0, inside = 0; const NB = 48, ND = 120;
+  for (let i = 0; i < NB; i++) { const ph = 2 * Math.PI * i / NB; const qx = T.x + T.r * Math.cos(ph) - G[0], qy = T.y + T.r * Math.sin(ph) - G[1];
+    const a = inv[0] * qx + inv[2] * qy, b = inv[1] * qx + inv[3] * qy; maxRho = Math.max(maxRho, Math.hypot(a, b)); }
+  for (let i = 0; i < ND; i++) { const rr = T.r * Math.sqrt((i + 0.5) / ND), ph = (i + 0.5) * 2.39996; const qx = T.x + rr * Math.cos(ph) - G[0], qy = T.y + rr * Math.sin(ph) - G[1];
+    const a = inv[0] * qx + inv[2] * qy, b = inv[1] * qx + inv[3] * qy; if (a * a + b * b <= 1) inside++; }
+  return { margin: 1 - maxRho, coverage: inside / ND, zlow, feasible, G, M };
+}
+function analytic(s, sun) {
+  let ox = 0, oy = 0, alpha = 180, theta = 0;
+  for (let it = 0; it < (P.off > 0 ? 4 : 1); it++) {
+    const dx = T.x - ox, dy = T.y - oy, dz = -P.H;
+    const b = 2 * (dx * s[0] + dy * s[1] + dz * s[2]), c = dx * dx + dy * dy + dz * dz - P.L * P.L;
+    const disc = b * b - 4 * c; if (disc < 0) return null;
+    const lam = (-b + Math.sqrt(disc)) / 2; if (lam <= 0) return null;
+    const ex = dx + lam * s[0], ey = dy + lam * s[1], ez = dz + lam * s[2];
+    alpha = ((Math.atan2(ex, ey) / DEG) % 360 + 360) % 360;
+    theta = Math.acos(Math.max(-1, Math.min(1, ez / P.L))) / DEG;
+    ox = P.off * Math.sin(alpha * DEG); oy = P.off * Math.cos(alpha * DEG);
+  }
+  return { alpha, theta, beta: 90 - sun.elev, gamma: sun.az };
+}
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const score = e => (e.coverage + (e.margin > 0 ? 0.2 * Math.min(e.margin, 0.5) : 2 * e.margin)) - (e.feasible ? 0 : 5);
+function solve(sun) {
+  const s = sunVec(sun);
+  let p = analytic(s, sun) || { alpha: sun.az, theta: P.thmax, beta: Math.min(90 - sun.elev, P.bemax), gamma: sun.az };
+  p.theta = clamp(p.theta, 0, P.thmax); p.beta = clamp(p.beta, 0, P.bemax);
+  let e = evaluate(p, s);
+  while (e.zlow < P.hmin && p.beta > 0.5) { p.beta -= 1; e = evaluate(p, s); }
+  if (e.feasible && e.margin >= 0) return { p, e, s };
+  let step = 8, best = score(e);
+  for (let iter = 0; iter < 80; iter++) {
+    let improved = false;
+    for (let j = 0; j < 4; j++) for (const sg of [-1, 1]) {
+      const q = { ...p };
+      if (j === 0) q.alpha = ((q.alpha + sg * step) % 360 + 360) % 360;
+      if (j === 1) q.theta = clamp(q.theta + sg * step, 0, P.thmax);
+      if (j === 2) q.beta = clamp(q.beta + sg * step, 0, P.bemax);
+      if (j === 3) q.gamma = ((q.gamma + sg * step) % 360 + 360) % 360;
+      const eq = evaluate(q, s), sc = score(eq);
+      if (sc > best + 1e-6) { best = sc; p = q; e = eq; improved = true; }
+    }
+    if (!improved) { step /= 2; if (step < 0.2) break; }
+  }
+  return { p, e, s };
+}
+
+// ---------------------------------------------------------------- UI
+const $ = id => document.getElementById(id);
+const css = v => getComputedStyle(document.documentElement).getPropertyValue(v).trim();
+const ranges = { H: 'Ho', L: 'Lo', off: 'offo', R: 'Ro', thmax: 'thmaxo', bemax: 'bemaxo', hmin: 'hmino' };
+for (const k in ranges) $(k).addEventListener('input', () => { P[k] = +$(k).value; refresh(true); });
+$('rt').addEventListener('input', () => { T.r = +$('rt').value; refresh(true); });
+$('time').addEventListener('input', () => refresh(false));
+['lat', 'lon', 'date', 'tz'].forEach(id => $(id).addEventListener('change', () => refresh(true)));
+$('place').addEventListener('change', () => { const v = $('place').value; if (v !== 'custom') { const [la, lo] = v.split(','); $('lat').value = la; $('lon').value = lo; refresh(true); } });
+$('center').onclick = () => { T.x = 0; T.y = 0; refresh(true); };
+$('south').onclick = () => { T.x = 0; T.y = P.L * 0.75; refresh(true); };
+$('now').onclick = () => { const n = new Date(); $('date').value = n.toISOString().slice(0, 10); $('tz').value = -n.getTimezoneOffset() / 60; $('time').value = n.getHours() * 60 + n.getMinutes(); refresh(true); };
+let playing = null;
+$('play').onclick = () => { if (playing) { clearInterval(playing); playing = null; $('play').textContent = '▶ Giornata'; return; }
+  $('play').textContent = '■ Stop'; playing = setInterval(() => { let v = +$('time').value + 10; if (v > 1320) v = 240; $('time').value = v; refresh(false); }, 120); };
+
+function localToUTC(minutes) { const [y, m, d] = $('date').value.split('-').map(Number); return new Date(Date.UTC(y, m - 1, d, 0, minutes - 60 * (+$('tz').value), 0)); }
+const fmtT = m => `${String(Math.floor(m / 60)).padStart(2, '0')}:${String(m % 60).padStart(2, '0')}`;
+
+// pianta: trascinamento della zona
+const topC = $("top"), tctx = topC.getContext('2d');
+let scale = 1, drag = false;
+const toPx = (x, y) => [topC.width / 2 + x * scale, topC.height / 2 - y * scale];
+function pick(ev) { const r = topC.getBoundingClientRect(); const x = (ev.clientX - r.left) * topC.width / r.width, y = (ev.clientY - r.top) * topC.height / r.height; return [(x - topC.width / 2) / scale, -(y - topC.height / 2) / scale]; }
+topC.addEventListener('pointerdown', ev => { const [x, y] = pick(ev); if (Math.hypot(x - T.x, y - T.y) < T.r + 0.3) { drag = true; topC.setPointerCapture(ev.pointerId); } });
+topC.addEventListener('pointermove', ev => { if (!drag) return; [T.x, T.y] = pick(ev); refresh(false); });
+topC.addEventListener('pointerup', () => { if (drag) { drag = false; refresh(true); } });
+
+function ellipsePath(ctx, G, M, k = 72) { ctx.beginPath(); for (let i = 0; i <= k; i++) { const ph = 2 * Math.PI * i / k; const x = G[0] + M[0] * Math.cos(ph) + M[2] * Math.sin(ph), y = G[1] + M[1] * Math.cos(ph) + M[3] * Math.sin(ph); const [px, py] = toPx(x, y); i ? ctx.lineTo(px, py) : ctx.moveTo(px, py); } ctx.closePath(); }
+
+function drawTop(sol, sun) {
+  const W = topC.width, Hh = topC.height; tctx.clearRect(0, 0, W, Hh);
+  const reach = Math.max(P.L + P.R + P.off + 0.6, Math.hypot(T.x, T.y) + T.r + 0.6, 3.2); scale = W / 2 / reach;
+  tctx.strokeStyle = css('--line'); tctx.lineWidth = 1;
+  for (let g = -Math.ceil(reach); g <= Math.ceil(reach); g++) { const [x0] = toPx(g, 0), [, y0] = toPx(0, g); tctx.beginPath(); tctx.moveTo(x0, 0); tctx.lineTo(x0, Hh); tctx.moveTo(0, y0); tctx.lineTo(W, y0); tctx.stroke(); }
+  tctx.fillStyle = css('--ink-2'); tctx.font = '12px ' + css('--font-body'); tctx.fillText('N ↑', 10, 18); tctx.fillText('griglia 1 m', 10, Hh - 10);
+  if (sol) {
+    const { C, n, E } = fk(sol.p);
+    tctx.fillStyle = css('--shade'); tctx.globalAlpha = 0.45; ellipsePath(tctx, sol.e.G, sol.e.M); tctx.fill(); tctx.globalAlpha = 1;
+    // tettuccio (bordo reale, proiezione verticale)
+    const [u1, u2] = basis(n); tctx.strokeStyle = css('--sea'); tctx.lineWidth = 2; tctx.beginPath();
+    for (let i = 0; i <= 72; i++) { const ph = 2 * Math.PI * i / 72; const x = C[0] + P.R * (u1[0] * Math.cos(ph) + u2[0] * Math.sin(ph)), y = C[1] + P.R * (u1[1] * Math.cos(ph) + u2[1] * Math.sin(ph)); const [px, py] = toPx(x, y); i ? tctx.lineTo(px, py) : tctx.moveTo(px, py); } tctx.stroke();
+    const [ex, ey] = toPx(E[0], E[1]), [cx, cy] = toPx(0, 0);
+    tctx.strokeStyle = css('--ink'); tctx.lineWidth = 5; tctx.lineCap = 'round'; tctx.beginPath(); tctx.moveTo(cx, cy); tctx.lineTo(ex, ey); tctx.stroke();
+    const [cxp, cyp] = toPx(C[0], C[1]); tctx.lineWidth = 3; tctx.beginPath(); tctx.moveTo(ex, ey); tctx.lineTo(cxp, cyp); tctx.stroke();
+    // freccia del sole
+    const az = sun.az * DEG, len = Math.min(W, Hh) * 0.42; tctx.strokeStyle = css('--sun'); tctx.lineWidth = 3; tctx.beginPath(); tctx.moveTo(cx, cy); tctx.lineTo(cx + len * Math.sin(az), cy - len * Math.cos(az)); tctx.stroke();
+    tctx.fillStyle = css('--sun'); tctx.font = '600 13px ' + css('--font-body'); tctx.fillText(`sole ${sun.elev.toFixed(0)}°`, cx + len * Math.sin(az) * 0.85 + 6, cy - len * Math.cos(az) * 0.85);
+  }
+  const [cx, cy] = toPx(0, 0); tctx.fillStyle = css('--ink'); tctx.beginPath(); tctx.arc(cx, cy, 7, 0, 7); tctx.fill();
+  const [tx, ty] = toPx(T.x, T.y); const ok = sol && sol.e.margin >= 0 && sol.e.feasible;
+  tctx.strokeStyle = ok ? css('--ok') : css('--bad'); tctx.lineWidth = 3; tctx.setLineDash([]); tctx.beginPath(); tctx.arc(tx, ty, T.r * scale, 0, 7); tctx.stroke();
+  tctx.fillStyle = tctx.strokeStyle; tctx.globalAlpha = 0.12; tctx.fill(); tctx.globalAlpha = 1;
+}
+
+const side = $('side'), sctx = side.getContext('2d');
+function drawSide(sol, sun) {
+  const W = side.width, Hh = side.height; sctx.clearRect(0, 0, W, Hh);
+  // asse orizzontale r lungo l'azimut del sole (positivo verso il sole), passante per la base del palo
+  const az = sun.az * DEG, ux = Math.sin(az), uy = Math.cos(az);
+  const proj = p => [p[0] * ux + p[1] * uy, p[2]];
+  const rmax = Math.max(P.L + P.R + P.off + 1, 4), zmax = P.H + P.L + P.R * 0.3 + 0.3;
+  const sc = Math.min(W / (2 * rmax), Hh / (zmax + 0.4));
+  const px = (r, z) => [W / 2 + r * sc, Hh - 30 - z * sc];
+  sctx.strokeStyle = css('--line'); sctx.lineWidth = 1; for (let g = -Math.ceil(rmax); g <= Math.ceil(rmax); g++) { const [x0] = px(g, 0); sctx.beginPath(); sctx.moveTo(x0, 0); sctx.lineTo(x0, Hh - 30); sctx.stroke(); }
+  for (let g = 1; g <= Math.ceil(zmax); g++) { const [, y0] = px(0, g); sctx.beginPath(); sctx.moveTo(0, y0); sctx.lineTo(W, y0); sctx.stroke(); }
+  const [gx0, gy0] = px(-rmax, 0), [gx1] = px(rmax, 0); sctx.strokeStyle = css('--ink-2'); sctx.lineWidth = 2; sctx.beginPath(); sctx.moveTo(gx0, gy0); sctx.lineTo(gx1, gy0); sctx.stroke();
+  const [, hy] = px(0, P.hmin); sctx.setLineDash([4, 4]); sctx.strokeStyle = css('--ink-2'); sctx.lineWidth = 1; sctx.beginPath(); sctx.moveTo(0, hy); sctx.lineTo(W, hy); sctx.stroke(); sctx.setLineDash([]);
+  sctx.fillStyle = css('--ink-2'); sctx.font = '12px ' + css('--font-body'); sctx.fillText('quota minima', 8, hy - 4); sctx.fillText('← ombra', 10, Hh - 10); sctx.textAlign = 'right'; sctx.fillText('sole →', W - 10, Hh - 10); sctx.textAlign = 'left';
+  if (!sol) return;
+  const { C, n, E } = fk(sol.p), s = sol.s;
+  const [u1, u2] = basis(n);
+  // raggi dal bordo
+  sctx.strokeStyle = css('--sun'); sctx.globalAlpha = 0.6; sctx.lineWidth = 1;
+  for (let i = 0; i < 72; i += 6) { const ph = 2 * Math.PI * i / 72; const p3 = [C[0] + P.R * (u1[0] * Math.cos(ph) + u2[0] * Math.sin(ph)), C[1] + P.R * (u1[1] * Math.cos(ph) + u2[1] * Math.sin(ph)), C[2] + P.R * (u1[2] * Math.cos(ph) + u2[2] * Math.sin(ph))];
+    const lam = p3[2] / s[2], g = [p3[0] - s[0] * lam, p3[1] - s[1] * lam, 0]; const [a, b] = px(...proj(p3)), [c, d] = px(...proj(g)); sctx.beginPath(); sctx.moveTo(a, b); sctx.lineTo(c, d); sctx.stroke(); }
+  sctx.globalAlpha = 1;
+  // palo, braccio, tettuccio
+  sctx.strokeStyle = css('--ink'); sctx.lineWidth = 6; sctx.lineCap = 'round'; const [bx, by] = px(0, 0), [tx, ty] = px(0, P.H); sctx.beginPath(); sctx.moveTo(bx, by); sctx.lineTo(tx, ty); sctx.stroke();
+  const [ex, ey] = px(...proj(E)); sctx.lineWidth = 4; sctx.beginPath(); sctx.moveTo(tx, ty); sctx.lineTo(ex, ey); sctx.stroke();
+  const [cx, cy] = px(...proj(C)); sctx.lineWidth = 3; sctx.beginPath(); sctx.moveTo(ex, ey); sctx.lineTo(cx, cy); sctx.stroke();
+  sctx.strokeStyle = css('--sea'); sctx.lineWidth = 3; sctx.beginPath();
+  for (let i = 0; i <= 72; i++) { const ph = 2 * Math.PI * i / 72; const p3 = [C[0] + P.R * (u1[0] * Math.cos(ph) + u2[0] * Math.sin(ph)), C[1] + P.R * (u1[1] * Math.cos(ph) + u2[1] * Math.sin(ph)), C[2] + P.R * (u1[2] * Math.cos(ph) + u2[2] * Math.sin(ph))]; const [a, b] = px(...proj(p3)); i ? sctx.lineTo(a, b) : sctx.moveTo(a, b); } sctx.stroke();
+  // zona a terra lungo la direzione del sole
+  const tr = T.x * ux + T.y * uy; const ok = sol.e.margin >= 0 && sol.e.feasible;
+  sctx.strokeStyle = ok ? css('--ok') : css('--bad'); sctx.lineWidth = 7; sctx.lineCap = 'butt'; const [z0] = px(tr - T.r, 0), [z1] = px(tr + T.r, 0); sctx.beginPath(); sctx.moveTo(z0, gy0 - 3); sctx.lineTo(z1, gy0 - 3); sctx.stroke();
+}
+
+// timeline della giornata
+const tl = $('timeline'), lctx = tl.getContext('2d');
+let dayCache = null;
+function computeDay() {
+  const lat = +$('lat').value, lon = +$('lon').value; const out = [];
+  for (let m = 240; m <= 1320; m += 10) {
+    const sun = sunPosition(localToUTC(m), lat, lon);
+    if (sun.elev < 5) { out.push({ m, sun, state: 0 }); continue; }
+    const sol = solve(sun); const full = sol.e.feasible && sol.e.margin >= 0;
+    out.push({ m, sun, sol, state: full ? 3 : sol.e.coverage >= 0.8 ? 2 : 1 });
+  }
+  return out;
+}
+function drawTimeline(day, curM) {
+  const W = tl.width, Hh = tl.height; lctx.clearRect(0, 0, W, Hh);
+  const x = m => (m - 240) / (1320 - 240) * W; const cols = [css('--line'), css('--bad'), css('--warn'), css('--ok')];
+  for (const d of day) { lctx.fillStyle = cols[d.state]; lctx.fillRect(x(d.m), 18, x(d.m + 10) - x(d.m) + 0.5, 34); }
+  lctx.fillStyle = css('--ink-2'); lctx.font = '12px ' + css('--font-body'); lctx.textAlign = 'center';
+  for (let h = 6; h <= 21; h += 3) { lctx.fillText(`${h}:00`, x(h * 60), 70); }
+  lctx.strokeStyle = css('--ink'); lctx.lineWidth = 2; lctx.beginPath(); lctx.moveTo(x(curM), 10); lctx.lineTo(x(curM), 58); lctx.stroke();
+  const full = day.filter(d => d.state === 3), partial = day.filter(d => d.state === 2);
+  let msg;
+  if (!full.length) msg = 'Copertura totale della zona mai possibile oggi con questa geometria: ' + (partial.length ? `parziale (≥80 %) ${fmtT(partial[0].m)}–${fmtT(partial[partial.length - 1].m + 10)}.` : 'allarga il tettuccio, allunga lo sbalzo o riduci la zona.');
+  else { const gaps = []; for (let i = 1; i < full.length; i++) if (full[i].m - full[i - 1].m > 10) gaps.push(`${fmtT(full[i - 1].m + 10)}–${fmtT(full[i].m)}`);
+    msg = `Copertura totale dalle ${fmtT(full[0].m)} alle ${fmtT(full[full.length - 1].m + 10)} (${(full.length / 6).toFixed(1)} h)` + (gaps.length ? `, con buchi: ${gaps.join(', ')}` : '') + '. Prima e dopo il sole è troppo basso: il braccio è a fine corsa e l’ombra scappa verso il lato opposto al sole.'; }
+  $('window').textContent = msg;
+  const rows = day.filter(d => d.m % 60 === 0).map(d => `<tr><td>${fmtT(d.m)}</td><td>${d.sun.elev.toFixed(0)}°</td><td>${d.sun.az.toFixed(0)}°</td><td>${d.sol ? (100 * d.sol.e.coverage).toFixed(0) + ' %' : '—'}</td><td>${d.sol ? d.sol.p.theta.toFixed(0) + '°' : '—'}</td><td>${d.sol ? d.sol.p.beta.toFixed(0) + '°' : '—'}</td></tr>`).join('');
+  $('tbl').innerHTML = '<tr><th>ora</th><th>elev. sole</th><th>azimut</th><th>zona in ombra</th><th>θ braccio</th><th>β tettuccio</th></tr>' + rows;
+}
+
+function refresh(recomputeDay) {
+  for (const k in ranges) $(ranges[k]).value = (k === 'thmax' || k === 'bemax') ? P[k] + '°' : P[k].toFixed(2) + ' m';
+  $('rto').value = T.r.toFixed(2) + ' m';
+  const m = +$('time').value; $('timeOut').value = fmtT(m);
+  const sun = sunPosition(localToUTC(m), +$('lat').value, +$('lon').value);
+  const sol = sun.elev > 2 ? solve(sun) : null;
+  drawTop(sol, sun); drawSide(sol || { p: { alpha: 180, theta: 0, beta: 0, gamma: 180 }, e: { margin: -1, feasible: true }, s: sunVec({ elev: 5, az: sun.az }) }, sun);
+  const set = (id, val, cls) => { const el = $(id); el.querySelector('b').textContent = val; el.className = 'stat ' + (cls || ''); };
+  set('sSun', `${sun.elev.toFixed(1)}° / ${sun.az.toFixed(0)}°`);
+  if (sol) { const full = sol.e.feasible && sol.e.margin >= 0;
+    set('sCov', `${(100 * sol.e.coverage).toFixed(0)} %`, full ? 'ok' : sol.e.coverage >= 0.8 ? 'warn' : 'bad');
+    set('sMar', `${(100 * sol.e.margin * T.r).toFixed(0)} cm`, sol.e.margin >= 0 ? 'ok' : 'bad');
+    set('sPose', `${sol.p.alpha.toFixed(0)}° / ${sol.p.theta.toFixed(0)}° / ${sol.p.beta.toFixed(0)}°`, sol.p.theta > P.thmax - 0.5 ? 'warn' : '');
+    set('sLow', `${sol.e.zlow.toFixed(2)} m`, sol.e.zlow < P.hmin + 0.02 ? 'warn' : '');
+  } else { set('sCov', '—'); set('sMar', '—'); set('sPose', 'parcheggio'); set('sLow', '—'); }
+  if (recomputeDay || !dayCache) dayCache = computeDay();
+  drawTimeline(dayCache, m);
+}
+refresh(true);
+if (window.matchMedia) window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', () => refresh(false));
+</script>
